@@ -3,7 +3,7 @@ use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
-#[derive(Debug, PartialEq, Clone,Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, Copy)]
 pub enum AocDailyPart {
     Part1,
     Part2,
@@ -35,13 +35,13 @@ impl AocClient {
         res.text().await.unwrap()
     }
 
-    pub async fn submit_day<T: Display>(&self, day: &i64, part: &AocDailyPart, val: &T) -> AocResponse {
+    pub async fn submit_day<T: Display>(&self, day: i64, part: AocDailyPart, val: T) -> AocResponse {
         let submit_url = format!("https://adventofcode.com/2024/day/{}/answer", day);
         let result = format!("{}", val);
         let params = [("answer", result), ("level", part.to_string())];
         let raw_response = self.req.post(submit_url).form(&params).send().await.unwrap();
         let response_data = raw_response.text().await.unwrap();
-        let response=AocResponse::from_raw_response(response_data.as_str());
+        let response = AocResponse::from_raw_response(response_data.as_str());
         response
     }
 }
