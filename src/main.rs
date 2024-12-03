@@ -1,6 +1,7 @@
 mod day01;
 mod aoc;
 mod day02;
+mod day03;
 
 use cached::proc_macro::io_cached;
 use reqwest::cookie::Jar;
@@ -11,10 +12,11 @@ use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use thiserror::Error;
 
-use crate::aoc::{AocClient, AocResponse};
+use crate::aoc::{AocClient, AocDailyPart, AocResponse};
 use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
+use regex::Regex;
 
 fn prepare_aoc_client(aoc_session: &str) -> AocClient {
     let cookie_store = Arc::new(Jar::default());
@@ -85,8 +87,18 @@ async fn main() {
 
 
     // day02. kinda slow TODO: one-pass solution?
-    let day02_data = get_input_cached(&client, &aoc_user, 2).await.unwrap();
+    //let day02_data = get_input_cached(&client, &aoc_user, 2).await.unwrap();
+    //let started = Instant::now();
+    //day02::solve(&day02_data);
+    //println!("day02 took {} μs", (started.elapsed()).as_micros());
+
+    let day03_data = get_input_cached(&client, &aoc_user, 3).await.unwrap();
+    //println!("{}", day03_data);
+
     let started = Instant::now();
-    day02::solve(&day02_data);
-    println!("day02 took {} μs", (started.elapsed()).as_micros());
+    let (p1,p2) = day03::solve(&day03_data);
+    println!("day03 took {} μs", (started.elapsed()).as_micros());
+    //let response=submit_answer_stored(&client, &aoc_user, 3, AocDailyPart::Part2, p2).await;
+    //let response=submit_answer_stored(&client, &aoc_user, 3, AocDailyPart::Part2, p2).await;
+    //println!("{:?}",response);
 }
