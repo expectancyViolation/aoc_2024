@@ -2,6 +2,7 @@ mod day01;
 mod aoc;
 mod day02;
 mod day03;
+mod day04;
 
 use cached::proc_macro::io_cached;
 use reqwest::cookie::Jar;
@@ -12,11 +13,10 @@ use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use thiserror::Error;
 
-use crate::aoc::{AocClient, AocDailyPart, AocResponse};
+use crate::aoc::{AocClient, AocResponse};
 use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
-use regex::Regex;
 
 fn prepare_aoc_client(aoc_session: &str) -> AocClient {
     let cookie_store = Arc::new(Jar::default());
@@ -70,6 +70,14 @@ async fn submit_answer_stored<T: Display>(client: &AocClient, user: &str, day: i
     //}
 }
 
+async fn run_solve(client: &AocClient, user: &str, day: i64, solve: fn(&str) -> (i64, i64)) {
+    let data = get_input_cached(client, user, day).await.unwrap();
+    println!("day{:0>2}",day);
+    let started = Instant::now();
+    let (p1, p2) = solve(&data);
+    println!("\ttook {} μs", (started.elapsed()).as_micros());
+    println!("\t{} {}", p1, p2);
+}
 
 #[tokio::main]
 async fn main() {
@@ -79,26 +87,15 @@ async fn main() {
     let client = prepare_aoc_client(&aoc_session);
 
 
-    // day01
-    let day01_data = get_input_cached(&client, &aoc_user, 1).await.unwrap();
+    run_solve(&client,&aoc_user,1,day01::solve).await;
+    run_solve(&client,&aoc_user,2,day02::solve).await;
+    run_solve(&client,&aoc_user,3,day03::solve).await;
+
+    let day04_data = get_input_cached(&client, &aoc_user, 4).await.unwrap();
     let started = Instant::now();
-    day01::solve(&day01_data);
-    println!("day01 took {} μs", (started.elapsed()).as_micros());
-
-
-    // day02. kinda slow TODO: one-pass solution?
-    //let day02_data = get_input_cached(&client, &aoc_user, 2).await.unwrap();
-    //let started = Instant::now();
-    //day02::solve(&day02_data);
-    //println!("day02 took {} μs", (started.elapsed()).as_micros());
-
-    let day03_data = get_input_cached(&client, &aoc_user, 3).await.unwrap();
-    //println!("{}", day03_data);
-
-    let started = Instant::now();
-    let (p1,p2) = day03::solve(&day03_data);
-    println!("day03 took {} μs", (started.elapsed()).as_micros());
-    //let response=submit_answer_stored(&client, &aoc_user, 3, AocDailyPart::Part2, p2).await;
-    //let response=submit_answer_stored(&client, &aoc_user, 3, AocDailyPart::Part2, p2).await;
+    let (p1, p2) = day04::solve(&day04_data);
+    println!("{} {}", p1, p2);
+    println!("day04 took {} μs", (started.elapsed()).as_micros());
+    //let response=submit_answer_stored(&client, &aoc_user, 4, AocDailyPart::Part2, p2).await;
     //println!("{:?}",response);
 }
