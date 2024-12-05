@@ -18,7 +18,6 @@ impl Display for AocDailyPart {
     }
 }
 
-
 pub struct AocClient {
     req: Client,
 }
@@ -35,23 +34,32 @@ impl AocClient {
         res.text().await.unwrap()
     }
 
-    pub async fn submit_day<T: Display>(&self, day: i64, part: AocDailyPart, val: T) -> AocResponse {
+    pub async fn submit_day<T: Display>(
+        &self,
+        day: i64,
+        part: AocDailyPart,
+        val: T,
+    ) -> AocResponse {
         let submit_url = format!("https://adventofcode.com/2024/day/{}/answer", day);
         let result = format!("{}", val);
         let params = [("answer", result), ("level", part.to_string())];
-        let raw_response = self.req.post(submit_url).form(&params).send().await.unwrap();
+        let raw_response = self
+            .req
+            .post(submit_url)
+            .form(&params)
+            .send()
+            .await
+            .unwrap();
         let response_data = raw_response.text().await.unwrap();
         let response = AocResponse::from_raw_response(response_data.as_str());
         response
     }
 }
 
-
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct AocResponse {
     text: String,
 }
-
 
 impl AocResponse {
     pub fn from_raw_response(raw_response: &str) -> AocResponse {
@@ -59,10 +67,11 @@ impl AocResponse {
         let selector = Selector::parse("article").unwrap();
         let article = doc.select(&selector).next().unwrap();
         let text = article.text().collect::<Vec<_>>();
-        AocResponse { text: text.join("") }
+        AocResponse {
+            text: text.join(""),
+        }
     }
 }
-
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct AocSubmission {

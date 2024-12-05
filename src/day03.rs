@@ -8,7 +8,11 @@ struct Day03State {
 
 impl Default for Day03State {
     fn default() -> Self {
-        Day03State { disabled_sum: 0, enabled_sum: 0, is_enabled: true }
+        Day03State {
+            disabled_sum: 0,
+            enabled_sum: 0,
+            is_enabled: true,
+        }
     }
 }
 
