@@ -3,19 +3,19 @@ mod day01;
 mod day02;
 mod day03;
 mod day04;
+mod day05;
 
 use cached::proc_macro::io_cached;
+use itertools::Itertools;
 use reqwest::cookie::Jar;
 use reqwest::Url;
 use std::fmt::{Debug, Display};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use std::{fs, str};
-use std::cmp::Ordering;
-use itertools::Itertools;
+use std::str;
 use thiserror::Error;
 
-use crate::aoc::{AocClient, AocDailyPart, AocResponse};
+use crate::aoc::{AocClient, AocResponse};
 use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -100,39 +100,6 @@ async fn run_solve(client: &AocClient, user: &str, day: i64, solve: fn(&str) -> 
     println!("\t{} {}", p1, p2);
 }
 
-fn day05(data: &str) -> (i64, i64) {
-    let mut rules = [[Ordering::Equal; 100]; 100];
-    let mut part1 = 0;
-    let mut part2 = 0;
-    data.split("\n\n").enumerate().for_each(
-        |(part, x)| {
-            if part == 0 {
-                x.lines().for_each(|line| {
-                    let (rule_from, rule_to) = line.split("|").map(|n| n.parse::<usize>().unwrap()).collect_tuple().unwrap();
-                    rules[rule_from][rule_to] = Ordering::Less;
-                    rules[rule_to][rule_from] = Ordering::Greater;
-                })
-            } else {
-                x.lines().for_each(|line| {
-                    let mut nums = line
-                        .split(",")
-                        .map(|n| n.parse().unwrap())
-                        .collect::<Vec<usize>>();
-                    let sorted: Vec<usize> = nums
-                        .iter()
-                        .sorted_by(|&&a, &&b| rules[a][b])
-                        .cloned().collect();
-                    if nums == sorted {
-                        part1 += nums[nums.len() / 2];
-                    } else {
-                        part2 += sorted[sorted.len() / 2];
-                    }
-                });
-            }
-        }
-    );
-    (part1 as i64, part2 as i64)
-}
 
 #[tokio::main]
 async fn main() {
@@ -145,7 +112,7 @@ async fn main() {
     run_solve(&client, &aoc_user, 2, day02::solve).await;
     run_solve(&client, &aoc_user, 3, day03::solve).await;
     run_solve(&client, &aoc_user, 4, day04::solve).await;
-    run_solve(&client, &aoc_user, 5, day05).await;
+    run_solve(&client, &aoc_user, 5, day05::solve).await;
 
     //let day05_data = get_input_cached(&client, &aoc_user, 5).await.unwrap();
     //let (p1, p2) = day05(&day05_data);
