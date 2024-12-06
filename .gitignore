@@ -27,3 +27,4 @@ target/
 # aoc respones cache
 cache/
 /bigboys/
+/inputs/

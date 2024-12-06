@@ -4,21 +4,24 @@ mod day02;
 mod day03;
 mod day04;
 mod day05;
+mod day06;
 
 use cached::proc_macro::io_cached;
-use itertools::Itertools;
+use itertools::{iproduct, Itertools};
 use reqwest::cookie::Jar;
 use reqwest::Url;
 use std::fmt::{Debug, Display};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use std::str;
+use std::{io, str};
+use std::collections::{HashMap, HashSet};
 use thiserror::Error;
 
-use crate::aoc::{AocClient, AocResponse};
+use crate::aoc::{AocClient, AocDailyPart, AocResponse};
 use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
+use tokio::runtime::Runtime;
 
 fn prepare_aoc_client(aoc_session: &str) -> AocClient {
     let cookie_store = Arc::new(Jar::default());
@@ -101,18 +104,39 @@ async fn run_solve(client: &AocClient, user: &str, day: i64, solve: fn(&str) -> 
 }
 
 
-#[tokio::main]
-async fn main() {
-    dotenv::from_filename(".env").ok();
-    let aoc_session = std::env::var("AOC_SESSION").expect("AOC_SESSION not set");
-    let aoc_user = std::env::var("AOC_USER").expect("AOC_USER not set");
-    let client = prepare_aoc_client(&aoc_session);
 
-    run_solve(&client, &aoc_user, 1, day01::solve).await;
-    run_solve(&client, &aoc_user, 2, day02::solve).await;
-    run_solve(&client, &aoc_user, 3, day03::solve).await;
-    run_solve(&client, &aoc_user, 4, day04::solve).await;
-    run_solve(&client, &aoc_user, 5, day05::solve).await;
+
+
+
+fn tmain() {
+    let mut rt = Runtime::new().unwrap();
+    rt.block_on(async {
+        dotenv::from_filename(".env").ok();
+        let aoc_session = std::env::var("AOC_SESSION").expect("AOC_SESSION not set");
+        let aoc_user = std::env::var("AOC_USER").expect("AOC_USER not set");
+        let client = prepare_aoc_client(&aoc_session);
+
+        run_solve(&client, &aoc_user, 1, day01::solve).await;
+        run_solve(&client, &aoc_user, 2, day02::solve).await;
+        run_solve(&client, &aoc_user, 3, day03::solve).await;
+        run_solve(&client, &aoc_user, 4, day04::solve).await;
+        run_solve(&client, &aoc_user, 5, day05::solve).await;
+        run_solve(&client, &aoc_user, 6, day06::solve).await;
+
+
+        //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
+        //println!("{:?}", response);
+
+
+        //let (p1, p2) = day05(&day05_data);
+    })
+}
+
+fn main() {
+    tmain();
+    //let stdin = io::read_to_string(io::stdin()).unwrap();
+    //let res=day04::solve(stdin.as_str());
+    //println!("day04 result:{:?}", res);
 
     //let day05_data = get_input_cached(&client, &aoc_user, 5).await.unwrap();
     //let (p1, p2) = day05(&day05_data);

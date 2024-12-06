@@ -19,10 +19,8 @@ pub fn solve(data: &str) -> (i64, i64) {
                         .split(",")
                         .map(|n| n.parse().unwrap())
                         .collect::<Vec<usize>>();
-                    let sorted: Vec<usize> = nums
-                        .iter()
-                        .sorted_by(|&&a, &&b| rules[a][b])
-                        .cloned().collect();
+                    let mut sorted: Vec<usize> = nums.clone();
+                    sorted.sort_by(|&a, &b| rules[a][b]);
                     if nums == sorted {
                         part1 += (nums[nums.len() / 2]) as i64;
                     } else {
