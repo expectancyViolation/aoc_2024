@@ -86,6 +86,7 @@ pub fn solve(data: &str) -> (i64, i64) {
         .filter(|&&(x, y)| {
             let (_, looped) = state.clone().simulate(&occupied, Some((x, y)));
             looped
-        }).count();
+        })
+        .count();
     (r1, p2 as i64)
 }

@@ -6,7 +6,9 @@ mod day04;
 mod day05;
 mod day06;
 mod day07;
+mod day07_mitm;
 
+use std::any::type_name;
 use cached::proc_macro::io_cached;
 use reqwest::cookie::Jar;
 use reqwest::Url;
@@ -93,13 +95,17 @@ async fn submit_answer_stored<T: Display>(
     //}
 }
 
-async fn run_solve(client: &AocClient, user: &str, day: i64, solve: fn(&str) -> (i64, i64)) {
+async fn run_solve<F>(client: &AocClient, user: &str, day: i64, solve: F)
+where
+    F: Fn(&str) -> (i64, i64),
+{
     let data = get_input_cached(client, user, day).await.unwrap();
     println!("day{:0>2}", day);
     let started = Instant::now();
     let (p1, p2) = solve(&data);
-    println!("\ttook {} μs", started.elapsed().as_micros());
-    println!("\t{} {}", p1, p2);
+    let elapsed=started.elapsed().as_micros();
+    println!("  {} {}", p1, p2);
+    println!(" took {: >7} μs ({})\n", elapsed,type_name::<F>() );
 }
 
 fn tmain() {
@@ -117,13 +123,15 @@ fn tmain() {
         run_solve(&client, &aoc_user, 5, day05::solve).await;
         run_solve(&client, &aoc_user, 6, day06::solve).await;
         run_solve(&client, &aoc_user, 7, day07::solve).await;
-        run_solve(&client, &aoc_user, 7, day07::solve_recursive).await;
+        run_solve(&client, &aoc_user, 7, day07_mitm::solve).await;
 
         //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
         //println!("{:?}", response);
 
         //let day07_data = get_input_cached(&client, &aoc_user, 7).await.unwrap();
         // let started = Instant::now();
+        // let (p1, p2) = day07_mitm::solve(&day07_data);
+
         // let (p1, p2) = day07::solve(&day07_data);
         // let (p1, p2) = day07::solve(&day07_data);
         // println!("day07: {} {}", p1, p2);
