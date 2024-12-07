@@ -5,6 +5,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 
 use cached::proc_macro::io_cached;
 use itertools::{iproduct, Itertools};
@@ -15,6 +16,8 @@ use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use std::{io, str};
 use std::collections::{HashMap, HashSet};
+use futures::{FutureExt, StreamExt};
+use serde::de::Expected;
 use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse};
@@ -22,6 +25,7 @@ use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::runtime::Runtime;
+
 
 fn prepare_aoc_client(aoc_session: &str) -> AocClient {
     let cookie_store = Arc::new(Jar::default());
@@ -105,9 +109,6 @@ async fn run_solve(client: &AocClient, user: &str, day: i64, solve: fn(&str) -> 
 
 
 
-
-
-
 fn tmain() {
     let mut rt = Runtime::new().unwrap();
     rt.block_on(async {
@@ -122,9 +123,19 @@ fn tmain() {
         run_solve(&client, &aoc_user, 4, day04::solve).await;
         run_solve(&client, &aoc_user, 5, day05::solve).await;
         run_solve(&client, &aoc_user, 6, day06::solve).await;
+        run_solve(&client, &aoc_user, 7, day07::solve).await;
 
 
         //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
+        //println!("{:?}", response);
+
+        // let day07_data = get_input_cached(&client, &aoc_user, 7).await.unwrap();
+        //let (p1,p2) = day07(&day07_data);
+        //println!("day07: {} {}", p1, p2);
+        //let (p1, p2) = day05(&day05_data);
+        //println!("day05 results: {} {}", p1, p2);
+        //let started = Instant::now();
+        //let response = submit_answer_stored(&client, &aoc_user, 7, AocDailyPart::Part1, p1).await;
         //println!("{:?}", response);
 
 
@@ -138,11 +149,4 @@ fn main() {
     //let res=day04::solve(stdin.as_str());
     //println!("day04 result:{:?}", res);
 
-    //let day05_data = get_input_cached(&client, &aoc_user, 5).await.unwrap();
-    //let (p1, p2) = day05(&day05_data);
-    //println!("day05 results: {} {}", p1, p2);
-    //let started = Instant::now();
-    //let response = submit_answer_stored(&client, &aoc_user, 5, AocDailyPart::Part2, p2).await;
-    //println!("day 05 took")
-    //println!("{:?}", response);
 }
