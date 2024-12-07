@@ -1,3 +1,4 @@
+use std::cmp::max;
 use itertools::{iproduct, Itertools};
 use lazy_static::lazy_static;
 
@@ -66,7 +67,9 @@ fn parts(data: &str, part2: bool) -> i64 {
             let nums: Vec<_> = parts
                 .split_whitespace()
                 .map(|x| x.parse::<i64>().unwrap()).collect();
-            let break_ = nums.len() / 2;
+            // meet in the middle does not seem to be worth it (apart from last step)
+            let break_=1;
+            // println!("{}",break_);
 
             let y: Box<dyn Iterator<Item=i64>> = Box::new(vec![0].into_iter());
             let mut fw_poss_results = nums[..break_]
