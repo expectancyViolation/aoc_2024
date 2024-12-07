@@ -124,9 +124,20 @@ fn tmain() {
         //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
         //println!("{:?}", response);
 
-        // let day07_data = get_input_cached(&client, &aoc_user, 7).await.unwrap();
-        //let (p1,p2) = day07(&day07_data);
-        //println!("day07: {} {}", p1, p2);
+        //let day07_data = get_input_cached(&client, &aoc_user, 7).await.unwrap();
+//         let day07_data="190: 10 19
+// 3267: 81 40 27
+// 83: 17 5
+// 156: 15 6
+// 7290: 6 8 6 15
+// 161011: 16 10 13
+// 192: 17 8 14
+// 21037: 9 7 18 13
+// 292: 11 6 16 20";
+//
+//
+//         let (p1, p2) = day07::solve(&day07_data);
+//         println!("day07: {} {}", p1, p2);
         //let (p1, p2) = day05(&day05_data);
         //println!("day05 results: {} {}", p1, p2);
         //let started = Instant::now();
