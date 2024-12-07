@@ -117,16 +117,19 @@ fn tmain() {
         run_solve(&client, &aoc_user, 5, day05::solve).await;
         run_solve(&client, &aoc_user, 6, day06::solve).await;
         run_solve(&client, &aoc_user, 7, day07::solve).await;
+        run_solve(&client, &aoc_user, 7, day07::solve_recursive).await;
 
         //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
         //println!("{:?}", response);
 
         //let day07_data = get_input_cached(&client, &aoc_user, 7).await.unwrap();
-        //let (p1, p2) = day07::solve(&day07_data);
-        //println!("day07: {} {}", p1, p2);
+        // let started = Instant::now();
+        // let (p1, p2) = day07::solve(&day07_data);
+        // let (p1, p2) = day07::solve(&day07_data);
+        // println!("day07: {} {}", p1, p2);
+        // println!("took: {} μs", started.elapsed().as_micros());
         //let (p1, p2) = day05(&day05_data);
         //println!("day05 results: {} {}", p1, p2);
-        //let started = Instant::now();
         //let response = submit_answer_stored(&client, &aoc_user, 7, AocDailyPart::Part1, p1).await;
         //println!("{:?}", response);
 
