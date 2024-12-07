@@ -37,38 +37,46 @@ impl Day06Guard {
     fn simulate(&self, occupied: &Vec<Vec<bool>>) -> (HashSet<(i32, i32)>, bool) {
         let mut curr_state = self.clone();
         let mut visited = HashSet::new();
-        while (Self::is_in_bounds(curr_state.pos, &occupied) && !visited.contains(&curr_state)) {
+        while Self::is_in_bounds(curr_state.pos, &occupied) && !visited.contains(&curr_state) {
             visited.insert(curr_state.clone());
             curr_state = curr_state.step(&occupied);
-        };
-        let visited_positions = visited.iter().map(|state| state.pos).collect::<HashSet<_>>();
+        }
+        let visited_positions = visited
+            .iter()
+            .map(|state| state.pos)
+            .collect::<HashSet<_>>();
         let looped = Self::is_in_bounds(curr_state.pos, &occupied);
         (visited_positions, looped)
     }
 }
 
-
 fn parse(data: &str) -> (Day06Guard, Vec<Vec<bool>>) {
     let mut start_pos = (0, 0);
-    let L = data.lines().count();
-    let l = data.lines().next().unwrap().len();
-    let mut occupied = vec![vec![false; l]; L];
+    let h = data.lines().count();
+    let w = data.lines().next().unwrap().len();
+    let mut occupied = vec![vec![false; w]; h];
     data.lines().enumerate().for_each(|(x, line)| {
         for (y, c) in line.chars().enumerate() {
             match c {
                 '#' => {
                     occupied[x][y] = true;
                 }
-                '^' => { start_pos = (x as i32, y as i32) }
+                '^' => start_pos = (x as i32, y as i32),
                 _ => {}
             }
         }
     });
-    (Day06Guard { pos: start_pos, facing_index: 0 }, occupied)
+    (
+        Day06Guard {
+            pos: start_pos,
+            facing_index: 0,
+        },
+        occupied,
+    )
 }
 
 pub fn solve(data: &str) -> (i64, i64) {
-    let (mut state, mut occupied) = parse(&data);
+    let (state, mut occupied) = parse(&data);
 
     let (p1, _looped) = state.simulate(&occupied);
 

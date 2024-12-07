@@ -8,16 +8,15 @@ mod day06;
 mod day07;
 
 use cached::proc_macro::io_cached;
-use itertools::{iproduct, Itertools};
+use futures::{FutureExt, StreamExt};
+use itertools::Itertools;
 use reqwest::cookie::Jar;
 use reqwest::Url;
+use serde::de::Expected;
 use std::fmt::{Debug, Display};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use std::{io, str};
-use std::collections::{HashMap, HashSet};
-use futures::{FutureExt, StreamExt};
-use serde::de::Expected;
+use std::str;
 use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse};
@@ -25,7 +24,6 @@ use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::runtime::Runtime;
-
 
 fn prepare_aoc_client(aoc_session: &str) -> AocClient {
     let cookie_store = Arc::new(Jar::default());
@@ -72,7 +70,7 @@ async fn submit_answer_stored<T: Display>(
     client: &AocClient,
     user: &str,
     day: i64,
-    part: aoc::AocDailyPart,
+    part: AocDailyPart,
     answer: T,
 ) -> AocResponse {
     let time = SystemTime::now();
@@ -103,14 +101,12 @@ async fn run_solve(client: &AocClient, user: &str, day: i64, solve: fn(&str) -> 
     println!("day{:0>2}", day);
     let started = Instant::now();
     let (p1, p2) = solve(&data);
-    println!("\ttook {} μs", (started.elapsed()).as_micros());
+    println!("\ttook {} μs", started.elapsed().as_micros());
     println!("\t{} {}", p1, p2);
 }
 
-
-
 fn tmain() {
-    let mut rt = Runtime::new().unwrap();
+    let rt = Runtime::new().unwrap();
     rt.block_on(async {
         dotenv::from_filename(".env").ok();
         let aoc_session = std::env::var("AOC_SESSION").expect("AOC_SESSION not set");
@@ -122,9 +118,8 @@ fn tmain() {
         run_solve(&client, &aoc_user, 3, day03::solve).await;
         run_solve(&client, &aoc_user, 4, day04::solve).await;
         run_solve(&client, &aoc_user, 5, day05::solve).await;
-        run_solve(&client, &aoc_user, 6, day06::solve).await;
+        //run_solve(&client, &aoc_user, 6, day06::solve).await;
         run_solve(&client, &aoc_user, 7, day07::solve).await;
-
 
         //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
         //println!("{:?}", response);
@@ -138,7 +133,6 @@ fn tmain() {
         //let response = submit_answer_stored(&client, &aoc_user, 7, AocDailyPart::Part1, p1).await;
         //println!("{:?}", response);
 
-
         //let (p1, p2) = day05(&day05_data);
     })
 }
@@ -148,5 +142,4 @@ fn main() {
     //let stdin = io::read_to_string(io::stdin()).unwrap();
     //let res=day04::solve(stdin.as_str());
     //println!("day04 result:{:?}", res);
-
 }

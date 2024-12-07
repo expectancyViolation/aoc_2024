@@ -1,4 +1,3 @@
-use crate::day01;
 use counter::Counter;
 use itertools::Itertools;
 
@@ -31,14 +30,14 @@ fn part2(left_list: &Vec<i64>, right_list: &Vec<i64>) -> i64 {
     let counts = right_list.iter().collect::<Counter<_>>();
     left_list
         .iter()
-        .map(|x| x * (counts.get(x).cloned().unwrap_or(0)) as i64)
+        .map(|x| x * counts.get(x).cloned().unwrap_or(0) as i64)
         .sum::<i64>()
 }
 
 pub fn solve(input: &str) -> (i64, i64) {
     let (mut left_list, mut right_list) = parse(&input);
     // mutating list is ok, since part2 does not require order
-    let part1_result = day01::part1(&mut left_list, &mut right_list);
-    let part2_result = day01::part2(&left_list, &right_list);
+    let part1_result = part1(&mut left_list, &mut right_list);
+    let part2_result = part2(&left_list, &right_list);
     (part1_result, part2_result)
 }
