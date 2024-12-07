@@ -8,15 +8,12 @@ mod day06;
 mod day07;
 
 use cached::proc_macro::io_cached;
-use futures::{FutureExt, StreamExt};
-use itertools::Itertools;
 use reqwest::cookie::Jar;
 use reqwest::Url;
-use serde::de::Expected;
 use std::fmt::{Debug, Display};
+use std::str;
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use std::str;
 use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse};
@@ -118,26 +115,15 @@ fn tmain() {
         run_solve(&client, &aoc_user, 3, day03::solve).await;
         run_solve(&client, &aoc_user, 4, day04::solve).await;
         run_solve(&client, &aoc_user, 5, day05::solve).await;
-        //run_solve(&client, &aoc_user, 6, day06::solve).await;
+        run_solve(&client, &aoc_user, 6, day06::solve).await;
         run_solve(&client, &aoc_user, 7, day07::solve).await;
 
         //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
         //println!("{:?}", response);
 
         //let day07_data = get_input_cached(&client, &aoc_user, 7).await.unwrap();
-//         let day07_data="190: 10 19
-// 3267: 81 40 27
-// 83: 17 5
-// 156: 15 6
-// 7290: 6 8 6 15
-// 161011: 16 10 13
-// 192: 17 8 14
-// 21037: 9 7 18 13
-// 292: 11 6 16 20";
-//
-//
-//         let (p1, p2) = day07::solve(&day07_data);
-//         println!("day07: {} {}", p1, p2);
+        //let (p1, p2) = day07::solve(&day07_data);
+        //println!("day07: {} {}", p1, p2);
         //let (p1, p2) = day05(&day05_data);
         //println!("day05 results: {} {}", p1, p2);
         //let started = Instant::now();

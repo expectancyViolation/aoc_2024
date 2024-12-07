@@ -1,51 +1,50 @@
+use itertools::Itertools;
+use rayon::prelude::*;
 use std::collections::HashSet;
 
 const FACINGS: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 struct Day06Guard {
-    pos: (i32, i32),
+    x: i32,
+    y: i32,
     facing_index: usize,
 }
 
 impl Day06Guard {
-    fn step(&self, occupied: &Vec<Vec<bool>>) -> Day06Guard {
+    fn step(&mut self, occupied: &Vec<Vec<bool>>, blocked: Option<(i32, i32)>) {
         let (dx, dy) = FACINGS[self.facing_index];
-        let (x, y) = self.pos;
-        let (nx, ny) = (x + dx, y + dy);
+        let (nx, ny) = (self.x + dx, self.y + dy);
 
-        if Self::is_in_bounds((nx, ny), &occupied) && occupied[nx as usize][ny as usize] {
-            Day06Guard {
-                pos: self.pos,
-                facing_index: (self.facing_index + 1) % 4,
-            }
+        if blocked.is_some_and(|t| t == (nx, ny))
+            || (Self::is_in_bounds(nx, ny, &occupied) && occupied[nx as usize][ny as usize])
+        {
+            self.facing_index = (self.facing_index + 1) % 4;
         } else {
-            Day06Guard {
-                pos: (nx, ny),
-                facing_index: self.facing_index,
-            }
+            self.x = nx;
+            self.y = ny;
         }
     }
 
-    fn is_in_bounds(pos: (i32, i32), occupied: &Vec<Vec<bool>>) -> bool {
-        (0 <= pos.0)
-            && (pos.0 < occupied.len() as i32)
-            && (0 <= pos.1)
-            && (pos.1 < occupied[0].len() as i32)
+    fn is_in_bounds(x: i32, y: i32, occupied: &Vec<Vec<bool>>) -> bool {
+        (0 <= x) && (x < occupied.len() as i32) && (0 <= y) && (y < occupied[0].len() as i32)
     }
 
-    fn simulate(&self, occupied: &Vec<Vec<bool>>) -> (HashSet<(i32, i32)>, bool) {
-        let mut curr_state = self.clone();
+    fn simulate(
+        &mut self,
+        occupied: &Vec<Vec<bool>>,
+        blocked: Option<(i32, i32)>,
+    ) -> (HashSet<(i32, i32)>, bool) {
         let mut visited = HashSet::new();
-        while Self::is_in_bounds(curr_state.pos, &occupied) && !visited.contains(&curr_state) {
-            visited.insert(curr_state.clone());
-            curr_state = curr_state.step(&occupied);
+        while Self::is_in_bounds(self.x, self.y, &occupied) && !visited.contains(self) {
+            visited.insert(self.clone());
+            self.step(&occupied, blocked);
         }
         let visited_positions = visited
             .iter()
-            .map(|state| state.pos)
+            .map(|state| (state.x, state.y))
             .collect::<HashSet<_>>();
-        let looped = Self::is_in_bounds(curr_state.pos, &occupied);
+        let looped = Self::is_in_bounds(self.x, self.y, &occupied);
         (visited_positions, looped)
     }
 }
@@ -68,7 +67,8 @@ fn parse(data: &str) -> (Day06Guard, Vec<Vec<bool>>) {
     });
     (
         Day06Guard {
-            pos: start_pos,
+            x: start_pos.0,
+            y: start_pos.1,
             facing_index: 0,
         },
         occupied,
@@ -76,20 +76,16 @@ fn parse(data: &str) -> (Day06Guard, Vec<Vec<bool>>) {
 }
 
 pub fn solve(data: &str) -> (i64, i64) {
-    let (state, mut occupied) = parse(&data);
+    let (state, occupied) = parse(&data);
 
-    let (p1, _looped) = state.simulate(&occupied);
-
-    let mut p2 = 0;
-    for &(x, y) in p1.iter() {
-        let x = x as usize;
-        let y = y as usize;
-        if !occupied[x][y] {
-            occupied[x][y] = true;
-            let (_, looped) = state.simulate(&occupied);
-            occupied[x][y] = false;
-            p2 += if looped { 1 } else { 0 };
-        }
-    }
-    (p1.len() as i64, p2)
+    let (p1, _looped) = state.clone().simulate(&occupied, None);
+    let r1 = p1.len() as i64;
+    let to_check: Vec<(i32, i32)> = p1.into_iter().collect_vec();
+    let p2 = to_check
+        .par_iter()
+        .filter(|&&(x, y)| {
+            let (_, looped) = state.clone().simulate(&occupied, Some((x, y)));
+            looped
+        }).count();
+    (r1, p2 as i64)
 }

@@ -1,6 +1,6 @@
-use std::cmp::max;
 use itertools::{iproduct, Itertools};
 use lazy_static::lazy_static;
+use rayon::prelude::*;
 
 
 // fn combine(
@@ -59,7 +59,8 @@ lazy_static! {
 fn parts(data: &str, part2: bool) -> i64 {
     let unops: &Vec<OptOp> = if part2 { &part2_unops } else { &part1_unops };
     let ops: &Vec<Op> = if part2 {&part2_ops} else {&part1_ops};
-    data.lines()
+    let lines:Vec<_>=data.lines().collect();
+    lines.par_iter()
         .filter_map(|line| {
             let (target, parts) = line.split(":").collect_tuple().unwrap();
             let target = target.parse::<i64>().unwrap();
