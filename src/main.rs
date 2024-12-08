@@ -7,15 +7,23 @@ mod day05;
 mod day06;
 mod day07;
 mod day07_mitm;
+mod y16_day24;
+mod y16_day12;
+mod y16_assembunny;
+mod y16_day23;
+mod y16_day25;
+mod day08;
 
 use std::any::type_name;
 use cached::proc_macro::io_cached;
 use reqwest::cookie::Jar;
-use reqwest::Url;
+use reqwest::{Client, Url};
 use std::fmt::{Debug, Display};
 use std::str;
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
+use itertools::Itertools;
+use serde::de::Unexpected::Map;
 use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse};
@@ -24,16 +32,15 @@ use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::runtime::Runtime;
 
-fn prepare_aoc_client(aoc_session: &str) -> AocClient {
+fn prepare_client(aoc_session: &str) -> Client {
     let cookie_store = Arc::new(Jar::default());
     let cookie = format!("session={}", aoc_session);
     let aoc_url = "https://adventofcode.com".parse::<Url>().unwrap();
     cookie_store.add_cookie_str(&cookie, &aoc_url);
-    let c = reqwest::Client::builder()
+    reqwest::Client::builder()
         .cookie_provider(cookie_store)
         .build()
-        .unwrap();
-    AocClient::new(c)
+        .unwrap()
 }
 
 #[derive(Error, Debug, PartialEq, Clone)]
@@ -46,7 +53,7 @@ enum ExampleError {
 #[io_cached(
     disk = true,
     key = "String",
-    convert = r#"{ format!("{}_{}",user,day) }"#,
+    convert = r#"{ format!("{}_{}_{}",user,client.year,day) }"#,
     map_error = r##"|e| ExampleError::DiskError(format!("{:?}", e))"##,
     sync_to_disk_on_cache_change = true
 )]
@@ -103,9 +110,9 @@ where
     println!("day{:0>2}", day);
     let started = Instant::now();
     let (p1, p2) = solve(&data);
-    let elapsed=started.elapsed().as_micros();
+    let elapsed = started.elapsed().as_micros();
     println!("  {} {}", p1, p2);
-    println!(" took {: >7} μs ({})\n", elapsed,type_name::<F>() );
+    println!(" took {: >7} μs ({})\n", elapsed, type_name::<F>());
 }
 
 fn tmain() {
@@ -114,16 +121,18 @@ fn tmain() {
         dotenv::from_filename(".env").ok();
         let aoc_session = std::env::var("AOC_SESSION").expect("AOC_SESSION not set");
         let aoc_user = std::env::var("AOC_USER").expect("AOC_USER not set");
-        let client = prepare_aoc_client(&aoc_session);
+        let client = AocClient::new(prepare_client(&aoc_session));
 
-        run_solve(&client, &aoc_user, 1, day01::solve).await;
-        run_solve(&client, &aoc_user, 2, day02::solve).await;
-        run_solve(&client, &aoc_user, 3, day03::solve).await;
-        run_solve(&client, &aoc_user, 4, day04::solve).await;
-        run_solve(&client, &aoc_user, 5, day05::solve).await;
-        run_solve(&client, &aoc_user, 6, day06::solve).await;
-        run_solve(&client, &aoc_user, 7, day07::solve).await;
-        run_solve(&client, &aoc_user, 7, day07_mitm::solve).await;
+        // run_solve(&client, &aoc_user, 1, day01::solve).await;
+        // run_solve(&client, &aoc_user, 2, day02::solve).await;
+        // run_solve(&client, &aoc_user, 3, day03::solve).await;
+        // run_solve(&client, &aoc_user, 4, day04::solve).await;
+        // run_solve(&client, &aoc_user, 5, day05::solve).await;
+        // run_solve(&client, &aoc_user, 6, day06::solve).await;
+        // run_solve(&client, &aoc_user, 7, day07::solve).await;
+        // run_solve(&client, &aoc_user, 7, day07_mitm::solve).await;
+
+        run_solve(&client, &aoc_user, 8, day08::solve).await;
 
         //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
         //println!("{:?}", response);
@@ -145,8 +154,27 @@ fn tmain() {
     })
 }
 
+
+fn main_2016() {
+    let rt = Runtime::new().unwrap();
+    rt.block_on(async {
+        dotenv::from_filename(".env").ok();
+        let aoc_session = std::env::var("AOC_SESSION").expect("AOC_SESSION not set");
+        let aoc_user = std::env::var("AOC_USER").expect("AOC_USER not set");
+        let client = AocClient::for_year(prepare_client(&aoc_session), 2016);
+
+
+        run_solve(&client, &aoc_user, 12, y16_day12::solve).await;
+        run_solve(&client, &aoc_user, 24, y16_day24::solve).await;
+        run_solve(&client, &aoc_user, 25, y16_day25::solve).await;
+        //let res=y16_day23::solve(d23_data);
+        //println!("{:?}",res);
+    });
+}
+
 fn main() {
     tmain();
+    //main_2016();
     //let stdin = io::read_to_string(io::stdin()).unwrap();
     //let res=day04::solve(stdin.as_str());
     //println!("day04 result:{:?}", res);
