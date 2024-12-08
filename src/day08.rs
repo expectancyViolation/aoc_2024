@@ -1,15 +1,14 @@
 use gcd::euclid_u64;
 use itertools::Itertools;
-use std::collections::HashSet;
 
 pub(crate) fn solve(data: &str) -> (i64, i64) {
-    let mut nodes: Vec<HashSet<_>> = vec![HashSet::new(); 256];
+    let mut nodes: Vec<Vec<_>> = vec![Vec::new(); 256];
     for (i, line) in data.lines().enumerate() {
         for (j, char) in line.chars().enumerate() {
             match char {
                 '.' | '\n' => {}
                 _ => {
-                    nodes[char as usize].insert((i as i64, j as i64));
+                    nodes[char as usize].push((i as i64, j as i64));
                 }
             }
         }
@@ -37,10 +36,10 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
             mark(&mut part1_anti_nodes, x1 - dx, y1 - dy);
             mark(&mut part1_anti_nodes, x2 + dx, y2 + dy);
 
-            // this seems to not be necessary for given input
-            let g = euclid_u64(dx.abs() as u64, dy.abs() as u64) as i64;
-            dx = dx / g;
-            dy = dy / g;
+            ////this seems to not be necessary for given input
+            //let g = euclid_u64(dx.abs() as u64, dy.abs() as u64) as i64;
+            //dx = dx / g;
+            //dy = dy / g;
 
             let deltas = [(dx, dy), (-dx, -dy)];
             for &(dx, dy) in deltas.iter() {
