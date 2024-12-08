@@ -20,15 +20,20 @@ impl Display for AocDailyPart {
 
 pub struct AocClient {
     req: Client,
+    pub year: i32,
 }
 
 impl AocClient {
     pub fn new(client: Client) -> AocClient {
-        AocClient { req: client }
+        AocClient { req: client, year: 2024 }
+    }
+
+    pub fn for_year(client: Client, year: i32) -> AocClient {
+        AocClient { req: client, year }
     }
 
     pub async fn get_day(&self, day: i64) -> String {
-        let input_url = format!("https://adventofcode.com/2024/day/{}/input", day);
+        let input_url = format!("https://adventofcode.com/{}/day/{}/input", self.year, day);
         let res = self.req.get(input_url).send().await.unwrap();
         assert!(res.status().is_success());
         res.text().await.unwrap()
