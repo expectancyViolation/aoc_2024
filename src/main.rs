@@ -13,6 +13,7 @@ mod y16_assembunny;
 mod y16_day23;
 mod y16_day25;
 mod day08;
+mod day09;
 
 use std::any::type_name;
 use cached::proc_macro::io_cached;
@@ -132,7 +133,9 @@ fn tmain() {
         // run_solve(&client, &aoc_user, 7, day07::solve).await;
         // run_solve(&client, &aoc_user, 7, day07_mitm::solve).await;
 
-        run_solve(&client, &aoc_user, 8, day08::solve).await;
+        //run_solve(&client, &aoc_user, 8, day08::solve).await;
+
+        run_solve(&client, &aoc_user, 9, day09::solve).await;
 
         //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
         //println!("{:?}", response);
