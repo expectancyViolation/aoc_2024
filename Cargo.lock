@@ -57,6 +57,7 @@ dependencies = [
  "itertools",
  "lazy_static",
  "ndarray",
+ "rand",
  "rayon",
  "regex",
  "reqwest",
