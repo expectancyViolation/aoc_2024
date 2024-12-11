@@ -80,7 +80,7 @@ fn part2(data: &str) -> i64 {
         let bg = best_gap.clone();
         match bg {
             None => { /*cannot find suitable gap*/ }
-            Some((gap_size, &gap_ind)) => {
+            Some((_gap_size, &gap_ind)) => {
                 final_file_positions[file_id] = positions[gap_ind];
                 data[gap_ind] -= file_size;
                 positions[gap_ind] += file_size;

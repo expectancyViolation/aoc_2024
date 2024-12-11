@@ -74,7 +74,7 @@ impl AssembunnyState {
 
     fn set_operand(&mut self, operand: &Operand, value: i64) -> Result<(), AssembunnyError> {
         match operand {
-            Operand::Number(x) => Err(InvalidOperand),
+            Operand::Number(_) => Err(InvalidOperand),
             Operand::Register(r) => {
                 self.registers[*r] = value;
                 Ok(())

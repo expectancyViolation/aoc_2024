@@ -26,7 +26,6 @@ use std::str;
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use itertools::Itertools;
-use serde::de::Unexpected::Map;
 use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse};
@@ -40,7 +39,7 @@ fn prepare_client(aoc_session: &str) -> Client {
     let cookie = format!("session={}", aoc_session);
     let aoc_url = "https://adventofcode.com".parse::<Url>().unwrap();
     cookie_store.add_cookie_str(&cookie, &aoc_url);
-    reqwest::Client::builder()
+    Client::builder()
         .cookie_provider(cookie_store)
         .build()
         .unwrap()

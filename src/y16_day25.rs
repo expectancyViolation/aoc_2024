@@ -16,7 +16,7 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
             }
         };
         let is_ok = clock_signal.iter().enumerate().all(|(i, &val)| {
-            if (i % 2 == 1) { val == 1 } else { val == 0 }
+            if i % 2 == 1 { val == 1 } else { val == 0 }
         });
         Some(n).filter(|_| is_ok)
     }).next().unwrap();

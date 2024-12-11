@@ -1,4 +1,3 @@
-use gcd::euclid_u64;
 use itertools::Itertools;
 
 pub(crate) fn solve(data: &str) -> (i64, i64) {
