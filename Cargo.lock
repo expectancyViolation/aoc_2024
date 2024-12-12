@@ -65,6 +65,7 @@ dependencies = [
  "dotenv",
  "futures",
  "gcd",
+ "hashbrown 0.12.3",
  "itertools",
  "lazy_static",
  "memoize",

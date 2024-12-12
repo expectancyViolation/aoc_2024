@@ -18,13 +18,14 @@ mod day10;
 mod day11;
 mod day12;
 mod day11_exploration;
+mod day12_parallel;
 
 use std::any::type_name;
 use cached::proc_macro::io_cached;
 use reqwest::cookie::Jar;
 use reqwest::{Client, Url};
 use std::fmt::{Debug, Display};
-use std::str;
+use std::{io, str};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use itertools::Itertools;
@@ -142,7 +143,11 @@ fn tmain() {
 
         //run_solve(&client, &aoc_user, 12, day12::solve).await;
 
-        day11_exploration::tarjan(10_000_000);
+
+        // run_solve(&client, &aoc_user, 12, day12::solve).await;
+        run_solve(&client, &aoc_user, 12, day12_parallel::solve).await;
+
+        // day11_exploration::tarjan(10_000_000);
 
         //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
         //println!("{:?}", response);
@@ -183,9 +188,9 @@ fn main_2016() {
 }
 
 fn main() {
-    tmain();
+    //tmain();
     //main_2016();
-    //let stdin = io::read_to_string(io::stdin()).unwrap();
-    //let res=day04::solve(stdin.as_str());
-    //println!("day04 result:{:?}", res);
+    let stdin = io::read_to_string(io::stdin()).unwrap();
+    let res=day12_parallel::solve(stdin.as_str());
+    println!("day12 result:{:?}", res);
 }
