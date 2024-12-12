@@ -1,24 +1,24 @@
 use std::collections::{HashMap, HashSet};
 use itertools::iproduct;
 
-struct StrMap<'a> {
-    data: &'a mut [u8],
-    h: i32,
-    w: i32,
+pub(crate) struct StrMap<'a> {
+    pub(crate) data: &'a mut [u8],
+    pub(crate) h: i32,
+    pub(crate) w: i32,
 }
 
 impl<'a> StrMap<'a> {
-    fn get(&self, x: i32, y: i32) -> u8 {
+    pub(crate) fn get(&self, x: i32, y: i32) -> u8 {
         if x < 0 || y < 0 || (self.h <= x) || (self.w <= y) {
             255
         } else { self.data[(x * (self.w + 1) + y) as usize] }
     }
-    fn set(&mut self, x: i32, y: i32, val: u8) {
+    pub(crate) fn set(&mut self, x: i32, y: i32, val: u8) {
         self.data[(x * (self.w + 1) + y) as usize] = val;
     }
 }
 
-const DIRECTIONS: [(i32, i32); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+pub(crate) const DIRECTIONS: [(i32, i32); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
 
 
 pub(crate) fn solve(data: &str) -> (i64, i64) {

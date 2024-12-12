@@ -78,6 +78,7 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.3",
  "tokio",
+ "union-find",
 ]
 
 [[package]]
@@ -2316,6 +2317,12 @@ name = "unicode-width"
 version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7dd6e30e90baa6f72411720665d41d89b9a3d039dc45b8faea1ddd07f617f6af"
+
+[[package]]
+name = "union-find"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "039142448432983c34b64739f8526f8f233a1eec7a66e61b6ab29acfa781194e"
 
 [[package]]
 name = "untrusted"
