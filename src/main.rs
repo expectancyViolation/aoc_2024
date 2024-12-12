@@ -17,6 +17,7 @@ mod day09;
 mod day10;
 mod day11;
 mod day12;
+mod day11_exploration;
 
 use std::any::type_name;
 use cached::proc_macro::io_cached;
@@ -139,7 +140,9 @@ fn tmain() {
 
         // run_solve(&client, &aoc_user, 10, day10::solve).await;
 
-        run_solve(&client, &aoc_user, 12, day12::solve).await;
+        //run_solve(&client, &aoc_user, 12, day12::solve).await;
+
+        day11_exploration::tarjan(10_000_000);
 
         //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
         //println!("{:?}", response);

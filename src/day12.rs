@@ -64,8 +64,6 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
     let p2 = areas.iter().map(|(&p, &c)| {
         let &peri = perimeters.get(&p).unwrap_or(&0);
         let &peri2 = connected_perimeters.get(&p).unwrap_or(&0);
-        let x = (p as i32) / w;
-        let y = (p as i32) % w;
         // subtract connected perimeters (counted twice)
         (c * (peri - (peri2 / 2))) as i64
     }).sum();
