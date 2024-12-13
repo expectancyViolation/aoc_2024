@@ -5,7 +5,7 @@ use std::cmp::min;
 use rayon::prelude::IntoParallelRefIterator;
 use hashbrown::HashSet;
 
-const BLOCK_SIZE: usize = 100;
+const BLOCK_SIZE: usize = 50;
 
 
 pub(crate) fn solve(data: &str) -> (i64, i64) {
@@ -28,7 +28,7 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
         .map(|&(h_start, w_start)| {
             let h_end = min(h_start + (BLOCK_SIZE as i32), h);
             let w_end = min(w_start + (BLOCK_SIZE as i32), w);
-            let mut visited = HashSet::with_capacity(2 * BLOCK_SIZE * BLOCK_SIZE);
+            let mut visited = HashSet::with_capacity(BLOCK_SIZE * BLOCK_SIZE);
             let mut to_visit = Vec::new();
 
             let mut res1 = 0;
@@ -42,7 +42,6 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
                 let mut inline = 0;
                 let mut area = 0;
                 let sym = m.get(x, y);
-                // let mut to_visit = vec![(x, y)];
                 to_visit.clear();
                 to_visit.push((x, y));
                 while to_visit.len() > 0 {
@@ -56,22 +55,23 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
                         let (nx, ny) = (cx + dx, cy + dy);
                         let new_sym = m.get(nx, ny);
                         if (new_sym == sym) {
+                            // only count regions if their leftmost-upmost point is within our block
                             if (ny < w_start)
                                 || ((nx < h_start) && (ny < w_start + (BLOCK_SIZE as i32)))
                             {
                                 valid = false;
                             }
-                            for (ddx, ddy) in DIRECTIONS {
-                                if dx * ddx + dy * ddy != 0 {
-                                    continue;
-                                }
-                                let (xd, yd) = (cx + ddx, cy + ddy);
-                                let xd_sym = m.get(xd, yd);
-                                let (nxd, nyd) = (nx + ddx, ny + ddy);
-                                let nxd_sym = m.get(nxd, nyd);
-                                if (xd_sym != sym) && (nxd_sym != sym) {
-                                    inline += 1;
-                                }
+                            // rotate 90
+                            let (xd, yd) = (cx - dy, cy + dx);
+                            let (nxd, nyd) = (nx - dy, ny + dx);
+                            if (m.get(xd, yd) != sym) && (m.get(nxd, nyd) != sym) {
+                                inline += 1;
+                            }
+                            // rotate -90
+                            let (xd, yd) = (cx + dy, cy - dx);
+                            let (nxd, nyd) = (nx + dy, ny - dx);
+                            if (m.get(xd, yd) != sym) && (m.get(nxd, nyd) != sym) {
+                                inline += 1;
                             }
                             to_visit.push((nx, ny));
                         } else {

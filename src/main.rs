@@ -19,6 +19,7 @@ mod day11;
 mod day12;
 mod day11_exploration;
 mod day12_parallel;
+mod day13;
 
 use std::any::type_name;
 use cached::proc_macro::io_cached;
@@ -135,17 +136,19 @@ fn tmain() {
         // run_solve(&client, &aoc_user, 5, day05::solve).await;
         // run_solve(&client, &aoc_user, 6, day06::solve).await;
         // run_solve(&client, &aoc_user, 7, day07::solve).await;
-        // run_solve(&client, &aoc_user, 7, day07_mitm::solve).await;
-
-        //run_solve(&client, &aoc_user, 8, day08::solve).await;
-
+        //run_solve(&client, &aoc_user, 7, day07_mitm::solve).await;
+        // run_solve(&client, &aoc_user, 8, day08::solve).await;
+        // run_solve(&client, &aoc_user, 9, day09::solve).await;
         // run_solve(&client, &aoc_user, 10, day10::solve).await;
+        // run_solve(&client, &aoc_user, 11, day11::solve).await;
 
         //run_solve(&client, &aoc_user, 12, day12::solve).await;
 
 
-        // run_solve(&client, &aoc_user, 12, day12::solve).await;
-        run_solve(&client, &aoc_user, 12, day12_parallel::solve).await;
+        //run_solve(&client, &aoc_user, 12, day12::solve).await;
+        //run_solve(&client, &aoc_user, 12, day12_parallel::solve).await;
+
+        run_solve(&client, &aoc_user, 13, day13::solve).await;
 
         // day11_exploration::tarjan(10_000_000);
 
@@ -188,9 +191,9 @@ fn main_2016() {
 }
 
 fn main() {
-    //tmain();
+    tmain();
     //main_2016();
-    let stdin = io::read_to_string(io::stdin()).unwrap();
-    let res=day12_parallel::solve(stdin.as_str());
-    println!("day12 result:{:?}", res);
+    //let stdin = io::read_to_string(io::stdin()).unwrap();
+    //let res=day12_parallel::solve(stdin.as_str());
+    //println!("day12 result:{:?}", res);
 }
