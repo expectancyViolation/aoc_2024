@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use regex::Regex;
 
-fn solve_sle_integer(
+fn solve_2x2_sle_integer(
     m11: i64,
     m21: i64,
     m12: i64,
@@ -35,10 +35,10 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
             .map(|m| m.as_str().parse::<i64>().unwrap())
             .collect_tuple()
             .unwrap();
-        solve_sle_integer(m11, m21, m12, m22, b1, b2)
+        solve_2x2_sle_integer(m11, m21, m12, m22, b1, b2)
             .iter()
             .for_each(|(a, b)| p1 += 3 * a + b);
-        solve_sle_integer(m11, m21, m12, m22, b1 + PART2_HIGHER, b2 + PART2_HIGHER)
+        solve_2x2_sle_integer(m11, m21, m12, m22, b1 + PART2_HIGHER, b2 + PART2_HIGHER)
             .iter()
             .for_each(|(a, b)| p2 += 3 * a + b);
     }

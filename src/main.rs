@@ -20,6 +20,7 @@ mod day12;
 mod day11_exploration;
 mod day12_parallel;
 mod day13;
+mod day14;
 
 use std::any::type_name;
 use cached::proc_macro::io_cached;
@@ -148,7 +149,7 @@ fn tmain() {
         //run_solve(&client, &aoc_user, 12, day12::solve).await;
         //run_solve(&client, &aoc_user, 12, day12_parallel::solve).await;
 
-        run_solve(&client, &aoc_user, 13, day13::solve).await;
+        run_solve(&client, &aoc_user, 14, day14::solve).await;
 
         // day11_exploration::tarjan(10_000_000);
 
