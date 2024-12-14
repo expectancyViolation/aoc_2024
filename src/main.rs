@@ -30,7 +30,7 @@ use reqwest::{Client, Url};
 use std::fmt::{Debug, Display};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use std::str;
+use std::{io, str};
 use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse};
@@ -119,7 +119,7 @@ where
     let (p1, p2) = solve(&data);
     let elapsed = started.elapsed().as_micros();
     println!("  {} {}", p1, p2);
-    println!(" took {: >7} μs \n", elapsed)//, type_name::<F>());
+    println!(" took {: >7} μs \n", elapsed) //, type_name::<F>());
 }
 
 fn main_2024() {
@@ -148,11 +148,11 @@ fn main_2024() {
             (14, day14::solve),
         ];
 
-        // for (day, solver) in solves {
-        //     run_solve(&client, &aoc_user, day, solver).await;
-        // }
+        for (day, solver) in solves {
+            run_solve(&client, &aoc_user, day, solver).await;
+        }
 
-        run_solve(&client, &aoc_user, 6, day06::solve).await;
+        //run_solve(&client, &aoc_user, 6, day06::solve).await;
 
         //run_solve(&client, &aoc_user, 15, day15::solve).await;
     })
@@ -178,6 +178,6 @@ fn main() {
     main_2024();
     //main_2016();
     //let stdin = io::read_to_string(io::stdin()).unwrap();
-    //let res=day12_parallel::solve(stdin.as_str());
-    //println!("day12 result:{:?}", res);
+    //let res = day06::solve(stdin.as_str());
+    //println!("day6 result:{:?}", res);
 }
