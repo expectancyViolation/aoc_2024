@@ -21,6 +21,7 @@ mod day11_exploration;
 mod day12_parallel;
 mod day13;
 mod day14;
+mod util;
 
 use std::any::type_name;
 use cached::proc_macro::io_cached;

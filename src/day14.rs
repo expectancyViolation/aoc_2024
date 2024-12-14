@@ -1,8 +1,11 @@
+use std::cmp::max;
 use std::ops::{Add, Mul, Rem};
 use hashbrown::HashSet;
 use itertools::Itertools;
 use regex::Regex;
 use crate::day10::DIRECTIONS;
+use num::integer::lcm;
+use crate::util::chinese_remainder_theorem;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 struct V(i32, i32);
@@ -31,6 +34,7 @@ impl Rem<Self> for V {
         V(self.0.rem_euclid(rhs.0), self.1.rem_euclid(rhs.1))
     }
 }
+
 
 #[derive(Debug, Clone)]
 struct Robot {
@@ -68,6 +72,25 @@ fn get_quadrant_counts(robots: &Vec<Robot>, time: i32, limits: V) -> [i32; 5] {
     quadrant_count
 }
 
+fn get_variances(robots: &Vec<Robot>, time: i32, limits: V) -> (i32, i32) {
+    let positions = robots.iter().map(|robot| { robot.simulate(time, limits).pos }).collect_vec();
+    let n = positions.len() as i32;
+    let exx: i32 = positions.iter().map(|&pos| {
+        pos.0 * pos.0
+    }).sum();
+
+    let ex: i32 = positions.iter().map(|&pos| { pos.0 }).sum();
+
+
+    let eyy: i32 = positions.iter().map(|&pos| {
+        pos.1 * pos.1
+    }).sum();
+
+    let ey: i32 = positions.iter().map(|&pos| { pos.1 }).sum();
+
+    (n * exx - ex * ex, n * eyy - ey * ey)
+}
+
 pub(crate) fn solve(data: &str) -> (i64, i64) {
     let width = 101;
     let height = 103;
@@ -79,43 +102,20 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
         Robot { pos: V(x, y), vel: V(vx, vy) }
     }).collect_vec();
     let quadrant_counts = get_quadrant_counts(&robots, 100, V(width, height));
-    println!("Quadrant count: {:?}", quadrant_counts);
-
-    let mut m = 0;
-    let mut p2 = 0;
-    println!("{:?}", get_quadrant_counts(&robots, 6771, limits));
-
-    for i in 0..10000 {
-        let qc = get_quadrant_counts(&robots, i, V(width, height));
-        let positions: HashSet<_> = robots.iter().map(|robot| { robot.simulate(i, limits).pos }).collect();
-        let mut nb_counts = 0;
-        for pos in positions.iter() {
-            for (dx, dy) in DIRECTIONS {
-                let nb_pos = V(pos.0 + dx, pos.1 + dy);
-                if positions.contains(&nb_pos) {
-                    nb_counts += 1;
-                }
-            }
-        }
-        if nb_counts > m {
-            m = nb_counts;
-            p2 = i;
-        }
-    }
-
-    // let mut pic = vec![vec!["."; width as usize]; height as usize];
-    // for robot in robots {
-    //     let stepped = robot.simulate(am, limits);
-    //     pic[stepped.pos.1 as usize][stepped.pos.0 as usize] = "X";
-    // }
-    // println!("----------------");
-    // println!("{}", 6771);
-    // for row in pic.iter() {
-    //     println!("{}", row.join(""))
-    // }
-
     let p1 = quadrant_counts[1..].iter().product::<i32>() as i64;
-    // 2581 too low
-    // 7577 too high
+
+    let max_period = max(width, height);
+
+    let variances = (0..max_period).map(|i| get_variances(&robots, i, V(width, height))).collect_vec();
+    let x_variances = variances.iter().map(|&(x, y)| x).collect_vec();
+    let y_variances = variances.iter().map(|&(x, y)| y).collect_vec();
+    let x_rem = x_variances.iter().position_min().unwrap();
+    let y_rem = y_variances.iter().position_min().unwrap();
+
+    let residues = [x_rem as i32, y_rem as i32];
+    let moduli = [width, height];
+
+    let p2 = chinese_remainder_theorem(&residues, &moduli).unwrap();
+
     (p1, p2 as i64)
 }
