@@ -27,7 +27,7 @@ use cached::proc_macro::io_cached;
 use itertools::Itertools;
 use reqwest::cookie::Jar;
 use reqwest::{Client, Url};
-use std::fmt::{Debug, Display};
+use std::fmt::{Debug, Display, Formatter};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use std::{io, str};
@@ -109,17 +109,28 @@ async fn submit_answer_stored<T: Display>(
     //}
 }
 
-async fn run_solve<F>(client: &AocClient, user: &str, day: i64, solve: F)
+struct SolveResult {
+    day: i64,
+    p1: i64,
+    p2: i64,
+    elapsed_micros: u128,
+}
+
+impl Display for SolveResult {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "day {}\n {} {}\n took\t{} μs\n", self.day, self.p1, self.p2, self.elapsed_micros)
+    }
+}
+
+async fn run_solve<F>(client: &AocClient, user: &str, day: i64, solve: F) -> SolveResult
 where
     F: Fn(&str) -> (i64, i64),
 {
     let data = get_input_cached(client, user, day).await.unwrap();
-    println!("day{:0>2}", day);
     let started = Instant::now();
     let (p1, p2) = solve(&data);
-    let elapsed = started.elapsed().as_micros();
-    println!("  {} {}", p1, p2);
-    println!(" took {: >7} μs \n", elapsed) //, type_name::<F>());
+    let elapsed_micros = started.elapsed().as_micros();
+    SolveResult { day, p1, p2, elapsed_micros }
 }
 
 fn main_2024() {
@@ -148,12 +159,20 @@ fn main_2024() {
             (14, day14::solve),
         ];
 
+        let mut results = vec![];
+
         for (day, solver) in solves {
-            run_solve(&client, &aoc_user, day, solver).await;
+            let res = run_solve(&client, &aoc_user, day, solver).await;
+            results.push(res);
         }
 
-        //run_solve(&client, &aoc_user, 6, day06::solve).await;
+        let mut total_micros = 0;
+        for res in results {
+            println!("{}", res);
+            total_micros += res.elapsed_micros;
+        }
 
+        println!("Total solve time: {} μs", total_micros);
         //run_solve(&client, &aoc_user, 15, day15::solve).await;
     })
 }
