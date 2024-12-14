@@ -80,7 +80,7 @@ pub(crate) fn tarjan(n: i128) {
                     component_count += 1;
                     let mut css = 0;
                     let mut component =HashSet::new();
-                    while true {
+                    loop {
                         let w = tarjan_stack.pop().unwrap();
                         component.insert(w);
                         css += 1;

@@ -30,8 +30,8 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
             let &(x1, y1) = ns[0];
             let &(x2, y2) = ns[1];
 
-            let mut dx = x2 - x1;
-            let mut dy = y2 - y1;
+            let dx = x2 - x1;
+            let dy = y2 - y1;
             mark(&mut part1_anti_nodes, x1 - dx, y1 - dy);
             mark(&mut part1_anti_nodes, x2 + dx, y2 + dy);
 

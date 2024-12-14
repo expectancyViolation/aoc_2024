@@ -57,7 +57,7 @@ fn part2(data: &str) -> i64 {
     }));
     // i-th entry is index of available gap with size at least i
     let mut gap_indicies = [1; 10];
-    let mut advance = |i, data: &Vec<usize>, mut gap_inds: &mut [usize; 10]| {
+    let advance = |i, data: &Vec<usize>, gap_inds: &mut [usize; 10]| {
         while gap_inds[i] < data.len() && (data[gap_inds[i]] < i) {
             gap_inds[i] += 2;
         }

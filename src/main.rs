@@ -23,15 +23,14 @@ mod day13;
 mod day14;
 mod util;
 
-use std::any::type_name;
 use cached::proc_macro::io_cached;
+use itertools::Itertools;
 use reqwest::cookie::Jar;
 use reqwest::{Client, Url};
 use std::fmt::{Debug, Display};
-use std::{io, str};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use itertools::Itertools;
+use std::str;
 use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse};
@@ -120,10 +119,10 @@ where
     let (p1, p2) = solve(&data);
     let elapsed = started.elapsed().as_micros();
     println!("  {} {}", p1, p2);
-    println!(" took {: >7} μs ({})\n", elapsed, type_name::<F>());
+    println!(" took {: >7} μs \n", elapsed)//, type_name::<F>());
 }
 
-fn tmain() {
+fn main_2024() {
     let rt = Runtime::new().unwrap();
     rt.block_on(async {
         dotenv::from_filename(".env").ok();
@@ -131,46 +130,31 @@ fn tmain() {
         let aoc_user = std::env::var("AOC_USER").expect("AOC_USER not set");
         let client = AocClient::new(prepare_client(&aoc_session));
 
-        // run_solve(&client, &aoc_user, 1, day01::solve).await;
-        // run_solve(&client, &aoc_user, 2, day02::solve).await;
-        // run_solve(&client, &aoc_user, 3, day03::solve).await;
-        // run_solve(&client, &aoc_user, 4, day04::solve).await;
-        // run_solve(&client, &aoc_user, 5, day05::solve).await;
-        // run_solve(&client, &aoc_user, 6, day06::solve).await;
-        // run_solve(&client, &aoc_user, 7, day07::solve).await;
-        //run_solve(&client, &aoc_user, 7, day07_mitm::solve).await;
-        // run_solve(&client, &aoc_user, 8, day08::solve).await;
-        // run_solve(&client, &aoc_user, 9, day09::solve).await;
-        // run_solve(&client, &aoc_user, 10, day10::solve).await;
-        // run_solve(&client, &aoc_user, 11, day11::solve).await;
+        let solves: Vec<(i64, fn(&str) -> (i64, i64))> = vec![
+            (1, day01::solve),
+            (2, day02::solve),
+            (3, day03::solve),
+            (4, day04::solve),
+            (5, day05::solve),
+            (6, day06::solve),
+            (7, day07::solve),
+            (8, day08::solve),
+            (9, day09::solve),
+            (10, day10::solve),
+            (11, day11::solve),
+            //(12, day12::solve),
+            (12, day12_parallel::solve),
+            (13, day13::solve),
+            (14, day14::solve),
+        ];
 
-        //run_solve(&client, &aoc_user, 12, day12::solve).await;
+        // for (day, solver) in solves {
+        //     run_solve(&client, &aoc_user, day, solver).await;
+        // }
 
+        run_solve(&client, &aoc_user, 6, day06::solve).await;
 
-        //run_solve(&client, &aoc_user, 12, day12::solve).await;
-        //run_solve(&client, &aoc_user, 12, day12_parallel::solve).await;
-
-        run_solve(&client, &aoc_user, 14, day14::solve).await;
-
-        // day11_exploration::tarjan(10_000_000);
-
-        //let response = submit_answer_stored(&client, &aoc_user, 6, AocDailyPart::Part2, p2).await;
-        //println!("{:?}", response);
-
-        //let day07_data = get_input_cached(&client, &aoc_user, 7).await.unwrap();
-        // let started = Instant::now();
-        // let (p1, p2) = day07_mitm::solve(&day07_data);
-
-        // let (p1, p2) = day07::solve(&day07_data);
-        // let (p1, p2) = day07::solve(&day07_data);
-        // println!("day07: {} {}", p1, p2);
-        // println!("took: {} μs", started.elapsed().as_micros());
-        //let (p1, p2) = day05(&day05_data);
-        //println!("day05 results: {} {}", p1, p2);
-        //let response = submit_answer_stored(&client, &aoc_user, 7, AocDailyPart::Part1, p1).await;
-        //println!("{:?}", response);
-
-        //let (p1, p2) = day05(&day05_data);
+        //run_solve(&client, &aoc_user, 15, day15::solve).await;
     })
 }
 
@@ -187,13 +171,11 @@ fn main_2016() {
         run_solve(&client, &aoc_user, 12, y16_day12::solve).await;
         run_solve(&client, &aoc_user, 24, y16_day24::solve).await;
         run_solve(&client, &aoc_user, 25, y16_day25::solve).await;
-        //let res=y16_day23::solve(d23_data);
-        //println!("{:?}",res);
     });
 }
 
 fn main() {
-    tmain();
+    main_2024();
     //main_2016();
     //let stdin = io::read_to_string(io::stdin()).unwrap();
     //let res=day12_parallel::solve(stdin.as_str());

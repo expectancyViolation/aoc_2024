@@ -44,7 +44,7 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
                     let (nx, ny) = (x + dx, y + dy);
                     if m.get(nx, ny) == i {
                         new_frontier.insert((nx, ny));
-                        let mut entry = res.entry((nx, ny)).or_insert(0);
+                        let entry = res.entry((nx, ny)).or_insert(0);
                         *entry += curr_val;
                     }
                 })

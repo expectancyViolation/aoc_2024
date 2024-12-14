@@ -54,7 +54,7 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
                     for (dx, dy) in DIRECTIONS {
                         let (nx, ny) = (cx + dx, cy + dy);
                         let new_sym = m.get(nx, ny);
-                        if (new_sym == sym) {
+                        if new_sym == sym {
                             // only count regions if their leftmost-upmost point is within our block
                             if (ny < w_start)
                                 || ((nx < h_start) && (ny < w_start + (BLOCK_SIZE as i32)))

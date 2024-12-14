@@ -1,7 +1,7 @@
 use crate::y16_assembunny::AssembunnyError::{InvalidOperand, OutOfBounds};
 
 #[derive(Clone, Debug, Copy)]
-enum Operand {
+pub(crate) enum Operand {
     Number(i64),
     Register(usize),
 }
