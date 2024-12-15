@@ -1,21 +1,26 @@
-use crate::day14::V;
 use itertools::Itertools;
 use std::collections::VecDeque;
 use crate::str_map::StrMap;
+use crate::v::V;
 
 const RIGHT: V = V(0, 1);
 const LEFT: V = V(0, -1);
-fn determine_move_poss(m: &StrMap, robot: V, dv: V) -> Option<Vec<V>> {
-    let mut to_check = VecDeque::from([robot]);
-    let mut to_move = vec![];
+fn determine_move_poss(m: &StrMap, to_check: &mut VecDeque<V>, to_move: &mut Vec<V>, robot: V, dv: V) -> bool {
+    to_check.clear();
+    to_check.push_back(robot);
+    to_move.clear();
     while !to_check.is_empty() {
         let curr_check = to_check.pop_front().unwrap();
+        // this is O(N) but still fast, since vecs are small
+        if to_move.contains(&curr_check) {
+            continue;
+        }
         to_move.push(curr_check);
         let np = curr_check + dv;
         let curr_sym = m.get(np.0, np.1) as char;
         match curr_sym {
             '#' => {
-                return None;
+                return false;
             }
             '.' => {}
             'O' => {
@@ -36,13 +41,13 @@ fn determine_move_poss(m: &StrMap, robot: V, dv: V) -> Option<Vec<V>> {
             _ => unreachable!(),
         }
     }
-    Some(to_move.into_iter().unique().collect())
+    true
 }
 
-fn simulate_move(m: &mut StrMap, robot: &mut V, dv: V) {
-    let to_move = determine_move_poss(m, *robot, dv);
-    to_move.map(|vs| {
-        for &v in vs.iter().rev() {
+fn simulate_move(m: &mut StrMap, to_check: &mut VecDeque<V>, to_move: &mut Vec<V>, robot: &mut V, dv: V) {
+    let can_move = determine_move_poss(m, to_check, to_move, *robot, dv);
+    if can_move {
+        for &v in to_move.iter().rev() {
             let curr_sym = m.get(v.0, v.1);
             let nv = v + dv;
             //assert_eq!(m.get(nv.0, nv.1) as char, '.');
@@ -50,12 +55,14 @@ fn simulate_move(m: &mut StrMap, robot: &mut V, dv: V) {
             m.set(v.0, v.1, '.' as u8);
         }
         *robot = *robot + dv;
-    });
+    }
 }
 
 fn solve_map(m: &mut StrMap, moves: &[u8]) -> i64 {
     let robot = m.find('@' as u8).unwrap();
     let mut robot = V(robot.0, robot.1);
+    let mut to_move = Vec::new();
+    let mut to_check = VecDeque::new();
     for &mov in moves {
         let dv = match (mov as char) {
             '\n' => {
@@ -69,7 +76,7 @@ fn solve_map(m: &mut StrMap, moves: &[u8]) -> i64 {
                 continue;
             }
         };
-        simulate_move(m, &mut robot, dv);
+        simulate_move(m, &mut to_check, &mut to_move, &mut robot, dv);
     }
     let width = m.w as i64;
     m.data

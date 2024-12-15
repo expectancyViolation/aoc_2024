@@ -24,6 +24,7 @@ mod day14;
 mod util;
 mod day15;
 mod str_map;
+mod v;
 
 use cached::proc_macro::io_cached;
 use itertools::Itertools;
@@ -198,9 +199,9 @@ fn main_2016() {
 }
 
 fn main() {
-    main_2024();
+    //main_2024();
     //main_2016();
-    //let stdin = io::read_to_string(io::stdin()).unwrap();
-    //let res = day06::solve(stdin.as_str());
-    //println!("day6 result:{:?}", res);
+    let stdin = io::read_to_string(io::stdin()).unwrap();
+    let res = day15::solve(stdin.as_str());
+    println!("day15 result:{:?}", res);
 }
