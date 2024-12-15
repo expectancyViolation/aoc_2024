@@ -1,10 +1,16 @@
-const N_ROWS: usize = 60;
-type Bitmap = [u128; N_ROWS];
+use bnum::{BUint};
+
+type UI128 = BUint<2>; // 94*64=6016 bit
+
+
+const N_ROWS: usize = 100;
+type Bitmap = [UI128; N_ROWS];
 
 struct CollisionBitFront {
-    curr_mask: u128,
+    curr_mask: UI128,
     curr_row: usize,
 }
+
 
 fn step_frontier(
     blocked: &Bitmap,
@@ -14,12 +20,12 @@ fn step_frontier(
     part2: bool,
 ) -> bool {
     bitfront.curr_row = if up { bitfront.curr_row - 1 } else { bitfront.curr_row + 1 };
-    let res = (blocked[bitfront.curr_row] & bitfront.curr_mask) == 0;
+    let res = (blocked[bitfront.curr_row] & bitfront.curr_mask) == UI128::ZERO;
     let collided =
         if part2 {
             boxes[bitfront.curr_row] & (bitfront.curr_mask | (bitfront.curr_mask >> 1))
         } else {
-            (boxes[bitfront.curr_row] & bitfront.curr_mask)
+            boxes[bitfront.curr_row] & bitfront.curr_mask
         };
     bitfront.curr_mask = if part2 { collided | (collided << 1) } else { collided };
     res
@@ -27,12 +33,12 @@ fn step_frontier(
 
 fn can_move_vertical(blocked: &Bitmap, boxes: &Bitmap, robot: &(i32, i32), up: bool, part2: bool) -> bool {
     let mut curr_row = robot.0 as usize;
-    let mut curr_mask = 1 << robot.1;
+    let mut curr_mask = UI128::ONE << robot.1;
     let mut bf = CollisionBitFront {
         curr_mask,
         curr_row,
     };
-    while bf.curr_mask != 0 {
+    while bf.curr_mask != UI128::ZERO {
         if !step_frontier(blocked, &boxes, &mut bf, up, part2) {
             return false;
         }
@@ -42,20 +48,20 @@ fn can_move_vertical(blocked: &Bitmap, boxes: &Bitmap, robot: &(i32, i32), up: b
 
 fn move_left(blocked: &Bitmap, boxes: &mut Bitmap, robot: &mut (i32, i32), part2: bool) {
     let mut row_boxes = boxes[robot.0 as usize];
-    let mut j = 1 << robot.1;
+    let mut j = UI128::ONE << robot.1;
     // TODO: replace by bit-twiddling "next unset bit"?
     loop {
         j >>= 1;
-        let collision = (j & row_boxes != 0) || (part2 && (j & (row_boxes << 1) != 0));
+        let collision = (j & row_boxes != UI128::ZERO) || (part2 && (j & (row_boxes << 1) != UI128::ZERO));
         if !collision {
             break;
         }
     }
-    if blocked[robot.0 as usize] & j != 0 {
+    if blocked[robot.0 as usize] & j != UI128::ZERO {
         return;
     }
     robot.1 = robot.1 - 1;
-    let move_mask = ((1 << (robot.1 + 1)) - 1) ^ (j - 1);
+    let move_mask = ((UI128::ONE << (robot.1 + 1)) - UI128::ONE) ^ (j - UI128::ONE);
     let moving_boxes = move_mask & boxes[robot.0 as usize];
     boxes[robot.0 as usize] &= !move_mask;
     boxes[robot.0 as usize] |= moving_boxes >> 1;
@@ -63,21 +69,21 @@ fn move_left(blocked: &Bitmap, boxes: &mut Bitmap, robot: &mut (i32, i32), part2
 
 fn move_right(blocked: &Bitmap, boxes: &mut Bitmap, robot: &mut (i32, i32), part2: bool) {
     let mut row_boxes = boxes[robot.0 as usize];
-    let mut j = 1 << robot.1;
+    let mut j = UI128::ONE << robot.1;
 
     // TODO: replace by bit-twiddling "next unset bit"?
     loop {
         j <<= 1;
-        let collision = (j & row_boxes != 0) || (part2 && (j & (row_boxes << 1) != 0));
+        let collision = (j & row_boxes != UI128::ZERO) || (part2 && (j & (row_boxes << 1) != UI128::ZERO));
         if !collision {
             break;
         }
     }
-    if blocked[robot.0 as usize] & j != 0 {
+    if blocked[robot.0 as usize] & j != UI128::ZERO {
         return;
     }
     robot.1 = robot.1 + 1;
-    let move_mask = ((j << 1) - 1) ^ ((1 << robot.1) - 1);
+    let move_mask: UI128 = ((j << 1) - UI128::ONE) ^ ((UI128::ONE << robot.1) - UI128::ONE);
     let moving_boxes = move_mask & boxes[robot.0 as usize];
     boxes[robot.0 as usize] &= !move_mask;
     boxes[robot.0 as usize] |= moving_boxes << 1;
@@ -94,13 +100,13 @@ fn move_vertical(
         return;
     }
     let curr_row = robot.0 as usize;
-    let curr_mask = 1 << robot.1;
+    let curr_mask = UI128::ONE << robot.1;
     let mut bf = CollisionBitFront {
         curr_mask,
         curr_row,
     };
-    let mut prev_boxes = 0;
-    while bf.curr_mask != 0 {
+    let mut prev_boxes = UI128::ZERO;
+    while bf.curr_mask != UI128::ZERO {
         let prev_mask = bf.curr_mask;
         step_frontier(blocked, &boxes, &mut bf, up, part2);
         let old_boxes = prev_boxes;
@@ -121,7 +127,7 @@ fn solve_map(
     let mut robot = robot;
 
     for &m_ in moves {
-        let d = match (m_ as char) {
+        match m_ as char {
             '^' => move_vertical(blocked_locations, box_locations, &mut robot, true, part2),
             '>' => move_right(blocked_locations, box_locations, &mut robot, part2),
             'v' => move_vertical(blocked_locations, box_locations, &mut robot, false, part2),
@@ -134,7 +140,7 @@ fn solve_map(
     let mut res = 0;
     for (i, row) in box_locations.iter().enumerate() {
         for j in 0..128 {
-            if row & (1 << j) != 0 {
+            if row & (UI128::ONE << j) != UI128::ZERO {
                 res += 100 * i + j;
             }
         }
@@ -147,11 +153,11 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
     let width = data.lines().next().unwrap().len();
     let height = (split) / width;
 
-    let mut box_locations: Bitmap = [0; N_ROWS];
-    let mut blocked_locations: Bitmap = [0; N_ROWS];
+    let mut box_locations: Bitmap = [UI128::ZERO; N_ROWS];
+    let mut blocked_locations: Bitmap = [UI128::ZERO; N_ROWS];
 
-    let mut box2_locations: Bitmap = [0; N_ROWS];
-    let mut blocked2_locations: Bitmap = [0; N_ROWS];
+    let mut box2_locations: Bitmap = [UI128::ZERO; N_ROWS];
+    let mut blocked2_locations: Bitmap = [UI128::ZERO; N_ROWS];
 
     let mut robot1 = (0, 0);
     let mut robot2 = (0, 0);
@@ -160,13 +166,13 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
         for (j, c) in line.chars().enumerate() {
             match c {
                 'O' => {
-                    box_locations[i] |= 1 << j;
-                    box2_locations[i] |= 1 << (2 * j);
+                    box_locations[i] |= UI128::ONE << j;
+                    box2_locations[i] |= UI128::ONE << (2 * j);
                 }
                 '#' => {
-                    blocked_locations[i] |= 1 << j;
-                    blocked2_locations[i] |= 1 << (2 * j);
-                    blocked2_locations[i] |= 1 << (2 * j + 1);
+                    blocked_locations[i] |= UI128::ONE << j;
+                    blocked2_locations[i] |= UI128::ONE << (2 * j);
+                    blocked2_locations[i] |= UI128::ONE << (2 * j + 1);
                 }
                 '@' => {
                     robot1 = (i as i32, j as i32);

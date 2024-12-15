@@ -26,6 +26,7 @@ mod day15;
 mod str_map;
 mod v;
 mod day15_bits;
+mod twiddle;
 
 use cached::proc_macro::io_cached;
 use itertools::Itertools;
@@ -179,7 +180,7 @@ fn main_2024() {
         }
 
         println!("Total solve time: {} μs", total_micros);
-        let res=run_solve(&client, &aoc_user, 15, day15_bits::solve).await;
+        let res = run_solve(&client, &aoc_user, 15, day15_bits::solve).await;
         // println!("{}",res);
     })
 }
@@ -203,10 +204,10 @@ fn main_2016() {
 fn main() {
     main_2024();
     //main_2016();
-    // let stdin = io::read_to_string(io::stdin()).unwrap();
-    //let data = fs::read_to_string("/tmp/day15.txt").unwrap();
+    //let stdin = io::read_to_string(io::stdin()).unwrap();
+    //let data = fs::read_to_string("bigboys/day15/bigboy.txt").unwrap();
     // let started = Instant::now();
-    //let res = day15::solve(data.as_str());
+    //let res = day15_bits::solve(data.as_str());
     // let elapsed_micros = started.elapsed().as_micros();
     //println!("day15 result:{:?}", res);
 }
