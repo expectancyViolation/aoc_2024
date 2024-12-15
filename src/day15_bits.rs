@@ -1,16 +1,5 @@
-use crate::str_map::StrMap;
-use std::cmp::PartialEq;
-use std::time::Instant;
-
-type Bitmap = [u128; 128];
-
-#[derive(Debug, Copy, Clone, PartialEq)]
-enum Direction {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-}
+const N_ROWS: usize = 128;
+type Bitmap = [u128; N_ROWS];
 
 struct CollisionBitFront {
     curr_mask: u128,
@@ -37,13 +26,7 @@ fn step_frontier(
     res
 }
 
-fn can_move(
-    blocked: &Bitmap,
-    boxes: &Bitmap,
-    robot: &(i32, i32),
-    d: Direction,
-    part2: bool,
-) -> bool {
+fn can_move(blocked: &Bitmap, boxes: &Bitmap, robot: &(i32, i32), up: bool, part2: bool) -> bool {
     let mut curr_row = robot.0;
     let mut curr_mask = 1 << robot.1;
     let mut bf = CollisionBitFront {
@@ -51,7 +34,7 @@ fn can_move(
         curr_row,
     };
     while bf.curr_mask != 0 {
-        if !step_frontier(blocked, &boxes, &mut bf, d == Direction::UP, part2) {
+        if !step_frontier(blocked, &boxes, &mut bf, up, part2) {
             return false;
         }
     }
@@ -101,16 +84,14 @@ fn move_right(blocked: &Bitmap, boxes: &mut Bitmap, robot: &mut (i32, i32), part
     boxes[robot.0 as usize] |= moving_boxes << 1;
 }
 
-fn move_(blocked: &Bitmap, boxes: &mut Bitmap, robot: &mut (i32, i32), d: Direction, part2: bool) {
-    if d == Direction::LEFT {
-        move_left(blocked, boxes, robot, part2);
-        return;
-    }
-    if d == Direction::RIGHT {
-        move_right(blocked, boxes, robot, part2);
-        return;
-    }
-    if !can_move(blocked, boxes, robot, d, part2) {
+fn move_vertical(
+    blocked: &Bitmap,
+    boxes: &mut Bitmap,
+    robot: &mut (i32, i32),
+    up: bool,
+    part2: bool,
+) {
+    if !can_move(blocked, boxes, robot, up, part2) {
         return;
     }
     let curr_row = robot.0;
@@ -122,59 +103,32 @@ fn move_(blocked: &Bitmap, boxes: &mut Bitmap, robot: &mut (i32, i32), d: Direct
     let mut prev_boxes = 0;
     while bf.curr_mask != 0 {
         let prev_mask = bf.curr_mask;
-        step_frontier(blocked, &boxes, &mut bf, d == Direction::UP, part2);
+        step_frontier(blocked, &boxes, &mut bf, up, part2);
         let old_boxes = prev_boxes;
         prev_boxes = boxes[bf.curr_row as usize];
         boxes[bf.curr_row as usize] &= !bf.curr_mask;
         boxes[bf.curr_row as usize] |= old_boxes & prev_mask;
     }
-    match d {
-        Direction::UP => {
-            robot.0 -= 1;
-        }
-        Direction::DOWN => {
-            robot.0 += 1;
-        }
-        Direction::LEFT => {
-            robot.1 -= 1;
-        }
-        Direction::RIGHT => {
-            robot.1 += 1;
-        }
-    }
+    robot.0 += if up { -1 } else { 1 };
 }
 
-
-fn solve_map(m: &StrMap, moves: &[u8], part2: bool) -> i64 {
-    let mut box_locations = [0u128; 128];
-    let mut blocked_locations = [0u128; 128];
-    let mut robot = (0, 0);
-    for i in 0..m.h {
-        for j in 0..m.w {
-            match m.get(i, j) as char {
-                '#' => {
-                    blocked_locations[i as usize] |= (1 << j);
-                }
-                'O' | '[' => {
-                    box_locations[i as usize] |= (1 << j);
-                }
-                '@' => {
-                    robot = (i, j);
-                }
-                _ => {}
-            }
-        }
-    }
+fn solve_map(
+    box_locations: &mut Bitmap,
+    blocked_locations: &Bitmap,
+    robot: (i32, i32),
+    moves: &[u8],
+    part2: bool,
+) -> i64 {
+    let mut robot = robot;
 
     for &m_ in moves {
         let d = match (m_ as char) {
-            '^' => Direction::UP,
-            '>' => Direction::RIGHT,
-            'v' => Direction::DOWN,
-            '<' => Direction::LEFT,
+            '^' => move_vertical(blocked_locations, box_locations, &mut robot, true, part2),
+            '>' => move_right(blocked_locations, box_locations, &mut robot, part2),
+            'v' => move_vertical(blocked_locations, box_locations, &mut robot, false, part2),
+            '<' => move_left(blocked_locations, box_locations, &mut robot, part2),
             _ => continue,
         };
-        move_(&blocked_locations, &mut box_locations, &mut robot, d, part2);
         //draw(&blocked_locations, &mut box_locations, &robot, part2);
     }
 
@@ -194,59 +148,48 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
     let width = data.lines().next().unwrap().len();
     let height = (split) / width;
 
-    let mut p1_data = data[..split + 2].to_owned().into_bytes();
-    let mut p2_data = p1_data
-        .iter()
-        .flat_map(|&x| {
-            let res = match x as char {
-                '.' => "..",
-                'O' => "[]",
-                '#' => "##",
-                '@' => "@.",
-                '\n' => "\n",
-                _ => "",
-            };
-            res.as_bytes().iter().cloned()
-        })
-        .collect::<Vec<u8>>();
+    let mut box_locations = [0u128; N_ROWS];
+    let mut blocked_locations = [0u128; N_ROWS];
 
-    let m1 = StrMap {
-        data: p1_data.as_mut_slice(),
-        h: height as i32,
-        w: (width) as i32,
-    };
+    let mut box2_locations = [0u128; N_ROWS];
+    let mut blocked2_locations = [0u128; N_ROWS];
 
-    let m2 = StrMap {
-        data: p2_data.as_mut_slice(),
-        h: height as i32,
-        w: (width * 2) as i32,
-    };
-    let p1 = solve_map(&m1, data[split..].as_bytes(), false);
-    let p2 = solve_map(&m2, data[split..].as_bytes(), true);
+    let mut robot1 = (0, 0);
+    let mut robot2 = (0, 0);
 
+    data.lines().take(height).enumerate().for_each(|(i, line)| {
+        for (j, c) in line.chars().enumerate() {
+            match c {
+                'O' => {
+                    box_locations[i] |= 1 << j;
+                    box2_locations[i] |= 1 << (2 * j);
+                }
+                '#' => {
+                    blocked_locations[i] |= 1 << j;
+                    blocked2_locations[i] |= 1 << (2 * j);
+                    blocked2_locations[i] |= 1 << (2 * j + 1);
+                }
+                '@' => {
+                    robot1 = (i as i32, j as i32);
+                    robot2 = (i as i32, 2 * j as i32);
+                }
+                _ => {}
+            }
+        }
+    });
+    let p1 = solve_map(
+        &mut box_locations,
+        &mut blocked_locations,
+        robot1,
+        data[split..].as_bytes(),
+        false,
+    );
+    let p2 = solve_map(
+        &mut box2_locations,
+        &mut blocked2_locations,
+        robot2,
+        data[split..].as_bytes(),
+        true,
+    );
     (p1, p2)
 }
-
-// fn draw(blocked: &Bitmap, boxes: &Bitmap, robot: &(i32, i32), part2: bool) {
-//     let mut cmap = [['.'; 128]; 128];
-//     for (i, (bl, bo)) in blocked.iter().zip(boxes.iter()).enumerate() {
-//         assert_eq!(bl & bo, 0);
-//         for j in 0..128 {
-//             if bl & (1 << j) != 0 {
-//                 cmap[i][j] = '#';
-//             }
-//             if bo & (1 << j) != 0 {
-//                 if part2 {
-//                     cmap[i][j] = '[';
-//                     cmap[i][j + 1] = ']';
-//                 } else {
-//                     cmap[i][j] = 'O';
-//                 }
-//             }
-//         }
-//     }
-//     cmap[robot.0 as usize][robot.1 as usize] = '@';
-//     for row in cmap[..20].iter() {
-//         println!("{}", row[..20].iter().collect::<String>());
-//     }
-// }

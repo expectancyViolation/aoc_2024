@@ -203,9 +203,9 @@ fn main() {
     main_2024();
     //main_2016();
     // let stdin = io::read_to_string(io::stdin()).unwrap();
-    // let data = fs::read_to_string("bigboys/day15/bigboy.txt").unwrap();
+    //let data = fs::read_to_string("/tmp/day15.txt").unwrap();
     // let started = Instant::now();
-    // let res = day15::solve(data.as_str());
+    //let res = day15::solve(data.as_str());
     // let elapsed_micros = started.elapsed().as_micros();
-    // println!("day15 result:{:?}", res);
+    //println!("day15 result:{:?}", res);
 }
