@@ -161,6 +161,7 @@ fn main_2024() {
             (12, day12_parallel::solve),
             (13, day13::solve),
             (14, day14::solve),
+            (15, day15::solve),
             (15, day15_bits::solve),
         ];
 

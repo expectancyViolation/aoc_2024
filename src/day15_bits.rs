@@ -1,9 +1,9 @@
-const N_ROWS: usize = 128;
+const N_ROWS: usize = 60;
 type Bitmap = [u128; N_ROWS];
 
 struct CollisionBitFront {
     curr_mask: u128,
-    curr_row: i32,
+    curr_row: usize,
 }
 
 fn step_frontier(
@@ -13,21 +13,20 @@ fn step_frontier(
     up: bool,
     part2: bool,
 ) -> bool {
-    bitfront.curr_row += if up { -1 } else { 1 };
-    let res = (blocked[bitfront.curr_row as usize] & bitfront.curr_mask) == 0;
-    let mut collided = (boxes[bitfront.curr_row as usize] & bitfront.curr_mask);
-    if part2 {
-        collided |= boxes[bitfront.curr_row as usize] & (bitfront.curr_mask >> 1);
-    }
-    bitfront.curr_mask = collided;
-    if part2 {
-        bitfront.curr_mask |= (collided << 1);
-    }
+    bitfront.curr_row = if up { bitfront.curr_row - 1 } else { bitfront.curr_row + 1 };
+    let res = (blocked[bitfront.curr_row] & bitfront.curr_mask) == 0;
+    let collided =
+        if part2 {
+            boxes[bitfront.curr_row] & (bitfront.curr_mask | (bitfront.curr_mask >> 1))
+        } else {
+            (boxes[bitfront.curr_row] & bitfront.curr_mask)
+        };
+    bitfront.curr_mask = if part2 { collided | (collided << 1) } else { collided };
     res
 }
 
-fn can_move(blocked: &Bitmap, boxes: &Bitmap, robot: &(i32, i32), up: bool, part2: bool) -> bool {
-    let mut curr_row = robot.0;
+fn can_move_vertical(blocked: &Bitmap, boxes: &Bitmap, robot: &(i32, i32), up: bool, part2: bool) -> bool {
+    let mut curr_row = robot.0 as usize;
     let mut curr_mask = 1 << robot.1;
     let mut bf = CollisionBitFront {
         curr_mask,
@@ -91,10 +90,10 @@ fn move_vertical(
     up: bool,
     part2: bool,
 ) {
-    if !can_move(blocked, boxes, robot, up, part2) {
+    if !can_move_vertical(blocked, boxes, robot, up, part2) {
         return;
     }
-    let curr_row = robot.0;
+    let curr_row = robot.0 as usize;
     let curr_mask = 1 << robot.1;
     let mut bf = CollisionBitFront {
         curr_mask,
