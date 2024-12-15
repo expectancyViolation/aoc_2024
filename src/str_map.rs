@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+use std::mem;
 
 pub(crate) struct StrMap<'a> {
     pub(crate) data: &'a mut [u8],
@@ -14,6 +15,10 @@ impl<'a> StrMap<'a> {
     }
     pub(crate) fn set(&mut self, x: i32, y: i32, val: u8) {
         self.data[(x * (self.w + 1) + y) as usize] = val;
+    }
+
+    pub(crate) fn swap(&mut self, x1: i32, y1: i32, x2: i32, y2: i32) {
+        self.data.swap((x1 * (self.w + 1) + y1) as usize, (x2 * (self.w + 1) + y2) as usize);
     }
 
     pub(crate) fn find(&self, val: u8) -> Option<(i32, i32)> {

@@ -48,11 +48,9 @@ fn simulate_move(m: &mut StrMap, to_check: &mut VecDeque<V>, to_move: &mut Vec<V
     let can_move = determine_move_poss(m, to_check, to_move, *robot, dv);
     if can_move {
         for &v in to_move.iter().rev() {
-            let curr_sym = m.get(v.0, v.1);
             let nv = v + dv;
             //assert_eq!(m.get(nv.0, nv.1) as char, '.');
-            m.set(nv.0, nv.1, curr_sym);
-            m.set(v.0, v.1, '.' as u8);
+            m.swap(v.0, v.1, nv.0, nv.1);
         }
         *robot = *robot + dv;
     }
