@@ -1,3 +1,4 @@
+
 use hashbrown::HashMap;
 use itertools::Itertools;
 use rayon::prelude::*;
@@ -6,6 +7,7 @@ use std::cmp::max;
 use std::collections::HashSet;
 
 const FACINGS: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+
 
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 struct Day06Guard {

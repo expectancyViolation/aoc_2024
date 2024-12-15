@@ -104,9 +104,9 @@ fn move_vertical(
         let prev_mask = bf.curr_mask;
         step_frontier(blocked, &boxes, &mut bf, up, part2);
         let old_boxes = prev_boxes;
-        prev_boxes = boxes[bf.curr_row as usize];
-        boxes[bf.curr_row as usize] &= !bf.curr_mask;
-        boxes[bf.curr_row as usize] |= old_boxes & prev_mask;
+        prev_boxes = boxes[bf.curr_row];
+        boxes[bf.curr_row] &= !bf.curr_mask;
+        boxes[bf.curr_row] |= old_boxes & prev_mask;
     }
     robot.0 += if up { -1 } else { 1 };
 }
@@ -147,11 +147,11 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
     let width = data.lines().next().unwrap().len();
     let height = (split) / width;
 
-    let mut box_locations = [0u128; N_ROWS];
-    let mut blocked_locations = [0u128; N_ROWS];
+    let mut box_locations: Bitmap = [0; N_ROWS];
+    let mut blocked_locations: Bitmap = [0; N_ROWS];
 
-    let mut box2_locations = [0u128; N_ROWS];
-    let mut blocked2_locations = [0u128; N_ROWS];
+    let mut box2_locations: Bitmap = [0; N_ROWS];
+    let mut blocked2_locations: Bitmap = [0; N_ROWS];
 
     let mut robot1 = (0, 0);
     let mut robot2 = (0, 0);
