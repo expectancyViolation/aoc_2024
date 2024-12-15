@@ -1,9 +1,9 @@
-use crate::day10::{StrMap, DIRECTIONS};
 use itertools::iproduct;
 use rayon::iter::ParallelIterator;
 use std::cmp::min;
 use rayon::prelude::IntoParallelRefIterator;
 use hashbrown::HashSet;
+use crate::str_map::{StrMap, DIRECTIONS};
 
 const BLOCK_SIZE: usize = 50;
 

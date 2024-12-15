@@ -1,4 +1,6 @@
 use hashbrown::HashMap;
+use rayon::prelude::IntoParallelRefIterator;
+use rayon::iter::ParallelIterator;
 
 pub(crate) fn n_digs(x: i64) -> i64 {
     (x.ilog10() + 1) as i64
@@ -45,8 +47,8 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
         .split_whitespace()
         .map(|x| x.parse().unwrap())
         .collect::<Vec<i64>>();
-    let p1 = nums.iter().map(|&x| count(x, 25)).sum();
-    let p2 = nums.iter().map(|&x| count(x, 75)).sum();
+    let p1 = nums.par_iter().map(|&x| count(x, 25)).sum();
+    let p2 = nums.par_iter().map(|&x| count(x, 75)).sum();
 
     (p1, p2)
 }

@@ -5,7 +5,7 @@ use std::cmp::max;
 use std::ops::{Add, Mul, Rem};
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-struct V(i32, i32);
+pub struct V(pub i32,pub  i32);
 
 impl Add for V {
     type Output = Self;

@@ -22,6 +22,8 @@ mod day12_parallel;
 mod day13;
 mod day14;
 mod util;
+mod day15;
+mod str_map;
 
 use cached::proc_macro::io_cached;
 use itertools::Itertools;
@@ -157,6 +159,7 @@ fn main_2024() {
             (12, day12_parallel::solve),
             (13, day13::solve),
             (14, day14::solve),
+            (15, day15::solve),
         ];
 
         let mut results = vec![];
@@ -173,7 +176,8 @@ fn main_2024() {
         }
 
         println!("Total solve time: {} μs", total_micros);
-        //run_solve(&client, &aoc_user, 15, day15::solve).await;
+        // let res=run_solve(&client, &aoc_user, 15, day15::solve).await;
+        // println!("{}",res);
     })
 }
 

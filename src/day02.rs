@@ -1,4 +1,7 @@
 use itertools::sorted;
+use rayon::prelude::IntoParallelRefIterator;
+
+use rayon::iter::ParallelIterator;
 
 fn parse(day02_data: &str) -> Vec<Vec<i64>> {
     day02_data
@@ -42,7 +45,7 @@ fn part2_is_safe(report: &Vec<i64>) -> bool {
 }
 
 fn part2(data: &Vec<Vec<i64>>) -> i64 {
-    data.iter().filter(|&x| part2_is_safe(x)).count() as i64
+    data.par_iter().filter(|&x| part2_is_safe(x)).count() as i64
 }
 
 pub fn solve(input: &str) -> (i64, i64) {

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use itertools::iproduct;
-use crate::day10::{StrMap, DIRECTIONS};
 use union_find::{UnionFind, UnionBySize, QuickUnionUf};
+use crate::str_map::{StrMap, DIRECTIONS};
 
 pub(crate) fn solve(data: &str) -> (i64, i64) {
     let h = data.lines().count() as i32;
