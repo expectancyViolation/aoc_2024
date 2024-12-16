@@ -27,6 +27,7 @@ mod str_map;
 mod v;
 mod day15_bits;
 mod day16;
+mod day16_parallel;
 
 use cached::proc_macro::io_cached;
 use itertools::Itertools;
@@ -167,9 +168,9 @@ fn main_2024() {
             (16,day16::solve)
         ];
 
-        let mut results = vec![];
+        // let mut results = vec![];
 
-        for (day, solver) in solves {
+        /*for (day, solver) in solves {
             let res = run_solve(&client, &aoc_user, day, solver).await;
             results.push(res);
         }
@@ -178,11 +179,11 @@ fn main_2024() {
         for res in results {
             println!("{}", res);
             total_micros += res.elapsed_micros;
-        }
+        }*/
 
-        println!("Total solve time: {} μs", total_micros);
-        // let res = run_solve(&client, &aoc_user, 16, day16::solve).await;
-        // println!("{}", res);
+        // println!("Total solve time: {} μs", total_micros);
+        let res = run_solve(&client, &aoc_user, 16, day16_parallel::solve).await;
+        println!("{}", res);
     })
 }
 
@@ -205,9 +206,9 @@ fn main_2016() {
 fn main() {
     main_2024();
     //main_2016();
-    // let stdin = io::read_to_string(io::stdin()).unwrap();
+    //let stdin = io::read_to_string(io::stdin()).unwrap();
     // let started = Instant::now();
-    // let res = day16::solve(stdin.as_str());
+    //let res = day16_parallel::solve(stdin.as_str());
     // let elapsed_micros = started.elapsed().as_micros();
-    // println!("day16 result:{:?}", res);
+    //println!("day16 result:{:?}", res);
 }
