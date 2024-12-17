@@ -79,7 +79,6 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
 
     // 7 bits "lookahead" seems to be enough
     let lookahead_bits = 7;
-    let mut solutions = HashSet::new();
     let mut candidates = (0..(1 << lookahead_bits))
         .map(|x| {
             (
@@ -98,20 +97,22 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
                 let mut n_cand = p_state.clone();
                 // each "out" instruction seems to match a single "adv 3" i.e. "discard 3 bits"
                 n_cand.reg_a += feed << lookahead_bits;
-                let output = n_cand.yield_(&instructions);
-                output.map(|x| {
-                    if x == instructions[i] {
-                        if i == instructions.len() - 1 {
-                            if n_cand.yield_(&instructions).is_none() {
-                                solutions.insert(a_reg);
-                            }
+                n_cand.yield_(&instructions).map(
+                    |x| {
+                        if x == instructions[i] {
+                            nc.push((n_cand, a_reg + (feed << (lookahead_bits + 3 * i))));
                         }
-                        nc.push((n_cand, a_reg + (feed << (lookahead_bits + 3 * i))));
-                    }
-                });
+                    });
             }
         }
         candidates = nc;
     }
-    (p1, *solutions.iter().min().unwrap())
+    let p2 = candidates.iter_mut().filter_map(|(ref mut state, a_reg)| {
+        if state.yield_(&instructions).is_none() {
+            Some(*a_reg)
+        } else {
+            None
+        }
+    }).min().unwrap();
+    (p1, p2)
 }
