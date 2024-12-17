@@ -28,6 +28,7 @@ mod v;
 mod day15_bits;
 mod day16_old;
 mod day16;
+mod day17;
 
 use cached::proc_macro::io_cached;
 use itertools::Itertools;
@@ -168,22 +169,22 @@ fn main_2024() {
             (16, day16::solve)
         ];
 
-        let mut results = vec![];
-
-        for (day, solver) in solves {
-            let res = run_solve(&client, &aoc_user, day, solver).await;
-            results.push(res);
-        }
-
-        let mut total_micros = 0;
-        for res in results {
-            println!("{}", res);
-            total_micros += res.elapsed_micros;
-        }
-
-        println!("Total solve time: {} μs", total_micros);
-        //let res = run_solve(&client, &aoc_user, 16, day16::solve).await;
-        //println!("{}", res);
+        // let mut results = vec![];
+        //
+        // for (day, solver) in solves {
+        //     let res = run_solve(&client, &aoc_user, day, solver).await;
+        //     results.push(res);
+        // }
+        //
+        // let mut total_micros = 0;
+        // for res in results {
+        //     println!("{}", res);
+        //     total_micros += res.elapsed_micros;
+        // }
+        //
+        // println!("Total solve time: {} μs", total_micros);
+        let res = run_solve(&client, &aoc_user, 17, day17::solve).await;
+        println!("{}", res);
     })
 }
 
