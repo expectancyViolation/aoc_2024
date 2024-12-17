@@ -1,109 +1,117 @@
-use hashbrown::HashSet;
 use regex::Regex;
+use std::collections::HashSet;
 
+#[derive(Debug, Clone, PartialEq, Ord, PartialOrd, Eq, Hash, Default)]
+struct D17Program {
+    reg_a: i64,
+    reg_b: i64,
+    reg_c: i64,
+    inst: usize,
+}
 
-fn run(program: &Vec<i128>, reg_a: i128, reg_b: i128, reg_c: i128, inst: usize, n_outputs: usize) -> (Vec<i128>, usize, usize) {
-    let mut reg_a = reg_a;
-    let mut reg_b = reg_b;
-    let mut reg_c = reg_c;
-    let mut inst = inst;
-    let mut bits_discarded = 0;
-    let mut max_bit_read = 0;
-
-    let mut output = vec![];
-    while inst < program.len() {
-        let op = program[inst + 1];
-        let co = match op {
-            x @ 0..=3 => x,
-            4 => reg_a,
-            5 => reg_b,
-            6 => reg_c,
-            _ => 0,
-        };
-        match program[inst] {
-            0 => {
-                reg_a /= (1 << co);
-                assert_eq!(co, 3);
-                //max_bit_read = max_bit_read.max(bits_discarded + (co as usize));
-                bits_discarded += 3;
-                //println!("discarded3 {}", reg_a);
-                //println!("AA{:?} {}", reg_a, (1 << co));
-                inst += 2;
-            }
-            1 => {
-                reg_b ^= op;
-                inst += 2;
-            }
-            2 => {
-                reg_b = co % 8;
-                inst += 2;
-            }
-            3 => {
-                match reg_a {
-                    0 => { inst += 2; }
-                    _ => { inst = op as usize }
+impl D17Program {
+    fn yield_(&mut self, program: &Vec<i64>) -> Option<i64> {
+        while self.inst < program.len() {
+            let op = program[self.inst + 1];
+            let co = match op {
+                x @ 0..=3 => x,
+                4 => self.reg_a,
+                5 => self.reg_b,
+                6 => self.reg_c,
+                _ => 0,
+            };
+            let curr_i = program[self.inst];
+            self.inst += 2;
+            match curr_i {
+                0 => {
+                    self.reg_a /= (1 << co);
+                    // co is always 3 here, else the solution would not work
+                    // (i.e. we always have to feed 3 bytes to stay ahead
                 }
-            }
-            4 => {
-                reg_b ^= reg_c;
-                inst += 2;
-            }
-            5 => {
-                output.push(co % 8);
-                if output.len() == n_outputs {
-                    return (output, bits_discarded, max_bit_read);
+                1 => {
+                    self.reg_b ^= op;
                 }
-                inst += 2;
+                2 => {
+                    self.reg_b = co % 8;
+                }
+                3 => match self.reg_a {
+                    0 => {}
+                    _ => self.inst = op as usize,
+                },
+                4 => {
+                    self.reg_b ^= self.reg_c;
+                }
+                5 => {
+                    return Some(co % 8);
+                }
+                6 => {
+                    self.reg_b = self.reg_a / (1 << co);
+                }
+                7 => {
+                    self.reg_c = self.reg_a / (1 << co);
+                }
+                _ => unreachable!(),
             }
-            6 => {
-                reg_b = reg_a / (1 << co);
-                inst += 2;
-            }
-            7 => {
-                reg_c = reg_a / (1 << co);
-                inst += 2;
-            }
-            _ => unreachable!(),
         }
+        None
     }
-
-    (output, bits_discarded, max_bit_read)
 }
 
 pub(crate) fn solve(data: &str) -> (i64, i64) {
     let reg = Regex::new(r"(-?\d+)").unwrap();
-    let nums = reg.find_iter(data).map(|x| x.as_str().parse().unwrap()).collect::<Vec<i128>>();
+    let nums = reg
+        .find_iter(data)
+        .map(|x| x.as_str().parse().unwrap())
+        .collect::<Vec<i64>>();
 
-
-    let program = nums[3..].to_vec();
-    let (p1, _, _) = run(&program, nums[0], nums[1], nums[2], 0, program.len());
-    println!("{:?}", p1);
-
-
-    let mut candidates = vec![(0, 0)];
-    let mut gotchas = HashSet::new();
-    for i in 1..program.len() + 1 {
-        let mut nc = HashSet::new();
-        for &(low, discarded) in candidates.iter() {
-            // 10 bit seems to be enough
-            for reg_a in 1..(1 << 10) {
-                let reg_a = (reg_a << discarded) + low;
-                let (output, bits_discarded, _max_bit_read) = run(&program, reg_a, 0, 0, 0, i);
-                if output == program[..output.len()] {
-                    if output == program {
-                        gotchas.insert(reg_a);
-                    }
-                    nc.insert((reg_a % (1 << bits_discarded), bits_discarded));
-                }
-            }
-        }
-        candidates = nc.into_iter().collect();
+    let instructions = nums[3..].to_vec();
+    let mut p1_prog = D17Program {
+        reg_a: nums[0],
+        reg_b: nums[1],
+        reg_c: nums[2],
+        inst: 0,
+    };
+    // encode p1 as digits of decimal number
+    let mut p1 = 0;
+    while let Some(o) = p1_prog.yield_(&instructions) {
+        p1 = 10 * p1 + o;
     }
 
-    // println!("GOTCHA:{}", gotchas.iter().min().unwrap());
-
-    // let mut i = 0;
-    // println!("{:?}", output);
-
-    (0, *gotchas.iter().min().unwrap() as i64)
+    // 7 bits "lookahead" seems to be enough
+    let lookahead_bits = 7;
+    let mut solutions = HashSet::new();
+    let mut candidates = (0..(1 << lookahead_bits))
+        .map(|x| {
+            (
+                D17Program {
+                    reg_a: x,
+                    ..Default::default()
+                },
+                x,
+            )
+        })
+        .collect::<Vec<(D17Program, i64)>>();
+    for i in 0..instructions.len() {
+        let mut nc = Vec::new();
+        for (p_state, a_reg) in candidates.into_iter() {
+            for feed in 0..(1 << 3) {
+                let mut n_cand = p_state.clone();
+                // each "out" instruction seems to match a single "adv 3" i.e. "discard 3 bits"
+                n_cand.reg_a += feed << lookahead_bits;
+                let output = n_cand.yield_(&instructions);
+                output.map(|x| {
+                    if x == instructions[i] {
+                        if i == instructions.len() - 1 {
+                            if n_cand.yield_(&instructions).is_none() {
+                                solutions.insert(a_reg);
+                            }
+                        }
+                        nc.push((n_cand, a_reg + (feed << (lookahead_bits + 3 * i))));
+                    }
+                });
+            }
+        }
+        candidates = nc;
+    }
+    (p1, *solutions.iter().min().unwrap())
 }
