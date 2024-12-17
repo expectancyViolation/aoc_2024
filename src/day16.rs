@@ -5,19 +5,18 @@ use std::cmp::Reverse;
 
 type D16State = (i32, i32, usize);
 
-// backwards pass counting all node on any minimal path
+// backwards pass counting all nodes on any minimal path
 fn get_best_pred_counts(
     end_state: D16State,
     m: &StrMap,
     distances: &HashMap<D16State, i32>,
 ) -> i64 {
-    let mut frontier: PriorityQueue<D16State, i32> = PriorityQueue::new();
+    let mut frontier = Vec::new();
     let mut visited_crossings: HashSet<D16State> = HashSet::new();
-    frontier.push(end_state, distances[&end_state]);
+    frontier.push(end_state);
     let mut res = 0;
     while !frontier.is_empty() {
-        let ((x, y, r), _dist) = frontier.pop().unwrap();
-        visited_crossings.insert((x, y, r));
+        let (x, y, r) = frontier.pop().unwrap();
         let new_rot = (r + 2) % 4;
         let (nx, ny) = (x + DELTAS[new_rot].0, y + DELTAS[new_rot].1);
         if m.get(nx, ny) == b'#' {
@@ -35,7 +34,8 @@ fn get_best_pred_counts(
                 if distances.contains_key(&pred) {
                     if distances[&pred] == expected_cost {
                         if !visited_crossings.contains(&pred) {
-                            frontier.push_increase(pred, distances[&pred]);
+                            visited_crossings.insert(pred);
+                            frontier.push(pred);
                         }
                         if !found {
                             res += counts;
@@ -51,7 +51,7 @@ fn get_best_pred_counts(
         .map(|y| (y.0, y.1))
         .collect::<HashSet<_>>()
         .len() as i64;
-    res as i64 + rs
+    res as i64 + rs + 1
 }
 
 fn step_to_next_crossing(m: &StrMap, x: i32, y: i32, i: usize) -> Option<(D16State, i32, i32)> {

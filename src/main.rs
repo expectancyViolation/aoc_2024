@@ -204,11 +204,11 @@ fn main_2016() {
 }
 
 fn main() {
-    main_2024();
+    //main_2024();
     //main_2016();
-    //let stdin = io::read_to_string(io::stdin()).unwrap();
+    let stdin = io::read_to_string(io::stdin()).unwrap();
     // let started = Instant::now();
-    //let res = day16::solve(stdin.as_str());
+    let res = day16::solve(stdin.as_str());
     // let elapsed_micros = started.elapsed().as_micros();
-    //println!("day16 result:{:?}", res);
+    println!("day16 result:{:?}", res);
 }
