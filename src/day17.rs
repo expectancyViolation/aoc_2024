@@ -1,18 +1,17 @@
 use regex::Regex;
-use std::collections::HashSet;
 
 #[derive(Debug, Clone, PartialEq, Ord, PartialOrd, Eq, Hash, Default)]
-struct D17Program {
+struct D17ProgramState {
     reg_a: i64,
     reg_b: i64,
     reg_c: i64,
     inst: usize,
 }
 
-impl D17Program {
-    fn yield_(&mut self, program: &Vec<i64>) -> Option<i64> {
-        while self.inst < program.len() {
-            let op = program[self.inst + 1];
+impl D17ProgramState {
+    fn yield_(&mut self, instructions: &Vec<i64>) -> Option<i64> {
+        while self.inst < instructions.len() {
+            let op = instructions[self.inst + 1];
             let co = match op {
                 x @ 0..=3 => x,
                 4 => self.reg_a,
@@ -20,11 +19,11 @@ impl D17Program {
                 6 => self.reg_c,
                 _ => 0,
             };
-            let curr_i = program[self.inst];
+            let curr_i = instructions[self.inst];
             self.inst += 2;
             match curr_i {
                 0 => {
-                    self.reg_a /= (1 << co);
+                    self.reg_a >>= co;
                     // co is always 3 here, else the solution would not work
                     // (i.e. we always have to feed 3 bytes to stay ahead
                 }
@@ -45,10 +44,10 @@ impl D17Program {
                     return Some(co % 8);
                 }
                 6 => {
-                    self.reg_b = self.reg_a / (1 << co);
+                    self.reg_b = self.reg_a >> co;
                 }
                 7 => {
-                    self.reg_c = self.reg_a / (1 << co);
+                    self.reg_c = self.reg_a >> co;
                 }
                 _ => unreachable!(),
             }
@@ -58,6 +57,11 @@ impl D17Program {
 }
 
 pub(crate) fn solve(data: &str) -> (i64, i64) {
+//     let data="Register A: 12345678
+// Register B: 0
+// Register C: 0
+//
+// Program: 2,4,1,0,7,5,1,5,0,3,4,5,5,5,3,0 ";
     let reg = Regex::new(r"(-?\d+)").unwrap();
     let nums = reg
         .find_iter(data)
@@ -65,7 +69,7 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
         .collect::<Vec<i64>>();
 
     let instructions = nums[3..].to_vec();
-    let mut p1_prog = D17Program {
+    let mut p1_prog = D17ProgramState {
         reg_a: nums[0],
         reg_b: nums[1],
         reg_c: nums[2],
@@ -82,14 +86,14 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
     let mut candidates = (0..(1 << lookahead_bits))
         .map(|x| {
             (
-                D17Program {
+                D17ProgramState {
                     reg_a: x,
                     ..Default::default()
                 },
                 x,
             )
         })
-        .collect::<Vec<(D17Program, i64)>>();
+        .collect::<Vec<(D17ProgramState, i64)>>();
     for i in 0..instructions.len() {
         let mut nc = Vec::new();
         for (p_state, a_reg) in candidates.into_iter() {
