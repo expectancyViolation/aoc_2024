@@ -1,5 +1,8 @@
+use std::collections::VecDeque;
 use crate::str_map::DIRECTIONS;
+use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
+use std::time::Instant;
 
 const W: i32 = 71;
 
@@ -29,7 +32,10 @@ fn bfs(start: (i32, i32), target: (i32, i32), blocked: &Vec<Vec<bool>>) -> i32 {
     }
 }
 
-fn dfs(frontier: &mut Vec<(i32, i32)>, blocked: &Vec<Vec<bool>>, visited: &mut Vec<Vec<bool>>) {
+fn dfs(start: (i32, i32), target: (i32, i32), blocked: &Vec<Vec<bool>>) -> HashMap<(i32, i32), (i32, i32)> {
+    let mut visited = vec![vec![false; W as usize]; W as usize];
+    let mut preds = HashMap::new();
+    let mut frontier = vec![start];
     while !frontier.is_empty() {
         let (x, y) = frontier.pop().unwrap();
         visited[x as usize][y as usize] = true;
@@ -39,13 +45,15 @@ fn dfs(frontier: &mut Vec<(i32, i32)>, blocked: &Vec<Vec<bool>>, visited: &mut V
                 continue;
             }
             if !visited[nx as usize][ny as usize] && !blocked[nx as usize][ny as usize] {
-                if visited[nx as usize][ny as usize] {
-                    continue;
+                preds.insert((nx, ny), (x, y));
+                if (nx, ny) == target {
+                    return preds;
                 }
                 frontier.push((nx, ny));
             }
         }
     }
+    preds
 }
 
 pub(crate) fn solve(data: &str) -> (i64, i64) {
@@ -64,31 +72,22 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
         blocked[*x][*y] = true;
     }
     let p1 = bfs((0, 0), (W - 1, W - 1), &blocked);
-    for (x, y) in blocks[1024..].iter() {
+    let first_double_even = 1024 + blocks[1024..].iter().position(|(x, y)| (x % 2) == 0 && (y % 2) == 0).unwrap();
+    for (x, y) in blocks[1024..first_double_even].iter() {
         blocked[*x][*y] = true;
     }
-    let mut visited = vec![vec![false; W as usize]; W as usize];
 
-    let mut frontier = vec![(0, 0)];
-    let mut prev_block = blocks[0];
-    for remove_block in blocks.iter().rev() {
-        let &(rx, ry) = remove_block;
-        blocked[rx][ry] = false;
-        dfs(&mut frontier, &mut blocked, &mut visited);
-        for (dx, dy) in DIRECTIONS {
-            let (nrx, nry) = (rx as i32 + dx, ry as i32 + dy);
-            if !(0 <= nrx && nrx < W && 0 <= nry && nry < W) {
-                continue;
-            }
-            if visited[nrx as usize][nry as usize] {
-                frontier.push((rx as i32, ry as i32));
-            }
-        }
-        if visited[W as usize - 1][W as usize - 1] {
-            break;
-        }
-        prev_block = *remove_block;
+    let preds = dfs((0, 0), (W - 1, W - 1), &blocked);
+    let mut path = Vec::new();
+    let mut p = preds.get(&(W - 1, W - 1));
+    while p.is_some() {
+        path.push(p.unwrap());
+        p = preds.get(p.unwrap());
     }
 
-    (p1 as i64, (prev_block.0 * 100000 + prev_block.1) as i64)
+    let p2=blocks[first_double_even..].iter().find(|(x, y)| {
+        path.contains(&&(*x as i32, *y as i32))
+    }).unwrap();
+
+    (p1 as i64, (p2.0 * 10000 + p2.1) as i64)
 }

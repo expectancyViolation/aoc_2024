@@ -31,6 +31,7 @@ mod y16_day24;
 mod y16_day25;
 mod day18;
 mod day18_bfs;
+mod day18_weird_input;
 
 use cached::proc_macro::io_cached;
 use itertools::Itertools;
@@ -181,6 +182,7 @@ fn main_2024() {
             (17, day17::solve),
             (18,day18::solve),
             (18,day18_bfs::solve),
+            (18,day18_weird_input::solve),
         ];
 
         let mut results = vec![];
