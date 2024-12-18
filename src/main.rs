@@ -34,13 +34,12 @@ mod day18_bfs;
 mod day18_weird_input;
 
 use cached::proc_macro::io_cached;
-use itertools::Itertools;
 use reqwest::cookie::Jar;
 use reqwest::{Client, Url};
 use std::fmt::{Debug, Display, Formatter};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use std::{fs, io, str};
+use std::str;
 use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse};

@@ -1,5 +1,3 @@
-use std::cmp::min;
-use std::collections::{HashMap, HashSet};
 use crate::day11::n_digs;
 
 fn step(n: i64) -> (i64, i64) {

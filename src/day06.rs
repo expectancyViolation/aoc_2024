@@ -3,7 +3,6 @@ use hashbrown::HashMap;
 use itertools::Itertools;
 use rayon::prelude::*;
 use std::cell::RefCell;
-use std::cmp::max;
 use std::collections::HashSet;
 
 const FACINGS: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];

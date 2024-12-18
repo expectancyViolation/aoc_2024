@@ -39,7 +39,7 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
         let y = y as i32;
 
         // merge walls (even across diagonals)
-        for (dx, dy) in iproduct!((-1..2), (-1..2)) {
+        for (dx, dy) in iproduct!(-1..2, -1..2) {
             let (nx, ny) = (x + dx, y + dy);
             if !(0 <= nx && nx < W && 0 <= ny && ny < W) || blocked[nx as usize][ny as usize] {
                 comps.union(k(x, y), k(nx, ny));

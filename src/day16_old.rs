@@ -69,9 +69,9 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
         let mut cd = 0;
         let mut cs = s;
         let mut cnt = 0;
-        let mut f = s.1;
+        let f = s.1;
         loop {
-            let mut nbs = get_nbs(cs);
+            let nbs = get_nbs(cs);
             if nbs.len() > 1 || (get_tile(cs.0) != b'.') {
                 pred_count.insert(s, cnt);
                 return Some((cs, cd));

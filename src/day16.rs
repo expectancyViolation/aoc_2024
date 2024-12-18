@@ -34,7 +34,7 @@ fn get_best_pred_counts(
                 let pred_rot = (cr + rot) % 4;
                 if distances[((cx * w + cy) * 4) as usize + pred_rot] == expected_cost {
                     if visited_crossings[(cx * w + cy) as usize] & (1 << pred_rot) == 0 {
-                        visited_crossings[(cx * w + cy) as usize] |= (1 << pred_rot);
+                        visited_crossings[(cx * w + cy) as usize] |= 1 << pred_rot;
                         frontier.push((cx, cy, pred_rot));
                     }
                     if !found {

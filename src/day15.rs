@@ -105,7 +105,7 @@ fn solve_map(m: &mut StrMap, moves: &[u8]) -> i64 {
 
     let mut tc2 = VecDeque::new();
     for &mov in moves {
-        let dv = match (mov as char) {
+        let dv = match mov as char {
             '\n' => {
                 continue;
             }
@@ -126,7 +126,7 @@ fn solve_map(m: &mut StrMap, moves: &[u8]) -> i64 {
         .map(|p| {
             let x = (p as i64) / width;
             let y = (p as i64) % width;
-            (x * 100 + y)
+            x * 100 + y
         })
         .sum::<i64>()
 }
@@ -135,8 +135,8 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
     let split = data.find("\n\n").unwrap();
     let width = data.lines().next().unwrap().len();
     let height = (split + 1) / width;
-    let mut p1_data = data[..split].to_owned().into_bytes();
-    let mut p2_data = p1_data
+    let p1_data = data[..split].to_owned().into_bytes();
+    let p2_data = p1_data
         .iter()
         .flat_map(|&x| {
             let res = match x as char {

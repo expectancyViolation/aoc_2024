@@ -43,8 +43,8 @@ fn can_move_vertical(
     up: bool,
     part2: bool,
 ) -> bool {
-    let mut curr_row = robot.0 as usize;
-    let mut curr_mask = UI128::power_of_two(robot.1 as u32);
+    let curr_row = robot.0 as usize;
+    let curr_mask = UI128::power_of_two(robot.1 as u32);
     let mut bf = CollisionBitFront {
         curr_mask,
         curr_row,
@@ -58,8 +58,8 @@ fn can_move_vertical(
 }
 
 fn move_left(blocked: &Bitmap, boxes: &mut Bitmap, robot: &mut (i32, i32), part2: bool) {
-    let mut row_boxes = boxes[robot.0 as usize];
-    let mut j = (robot.1 as u32 - 1);
+    let row_boxes = boxes[robot.0 as usize];
+    let mut j = robot.1 as u32 - 1;
     // TODO: replace by bit-twiddling "next unset bit"?
     while row_boxes.bit(j) || (part2 && (row_boxes.bit(j - 1))) {
         j -= 1;
@@ -76,7 +76,7 @@ fn move_left(blocked: &Bitmap, boxes: &mut Bitmap, robot: &mut (i32, i32), part2
 }
 
 fn move_right(blocked: &Bitmap, boxes: &mut Bitmap, robot: &mut (i32, i32), part2: bool) {
-    let mut row_boxes = boxes[robot.0 as usize];
+    let row_boxes = boxes[robot.0 as usize];
     let mut j = (robot.1 + 1) as u32;
 
     // TODO: replace by bit-twiddling "next unset bit"?

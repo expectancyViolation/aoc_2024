@@ -11,7 +11,7 @@ fn count(x: i64, n: i64) -> i64 {
     let mut buff = HashMap::new();
     curr.insert(x, 1);
     for i in 0..n {
-        let (mut from_, mut to_) = if (i % 2 == 0) {
+        let (from_, to_) = if i % 2 == 0 {
             (&mut curr, &mut buff)
         } else {
             (&mut buff, &mut curr)

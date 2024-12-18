@@ -1,5 +1,4 @@
 use std::fmt::{Display, Formatter};
-use std::mem;
 
 pub(crate) struct StrMap<'a> {
     pub(crate) data: &'a mut [u8],

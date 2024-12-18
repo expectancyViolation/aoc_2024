@@ -1,7 +1,6 @@
 use crate::str_map::{StrMap, DIRECTIONS};
 use itertools::iproduct;
 use std::collections::{HashMap, HashSet};
-use std::fmt::Display;
 
 pub(crate) fn solve(data: &str) -> (i64, i64) {
     let h = data.lines().count() as i32;
