@@ -11,7 +11,7 @@ mod year16;
 use cached::proc_macro::io_cached;
 use reqwest::cookie::Jar;
 use reqwest::{Client, Url};
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{Debug, Display};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use std::str;

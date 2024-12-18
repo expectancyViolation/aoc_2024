@@ -2,7 +2,6 @@ use hashbrown::HashMap;
 use itertools::Itertools;
 use rayon::prelude::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
-use scraper::selector::ToCss;
 
 pub(crate) fn n_digs(x: i64) -> i64 {
     (x.ilog10() + 1) as i64

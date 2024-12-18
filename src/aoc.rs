@@ -2,7 +2,6 @@ use reqwest::Client;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
-use ndarray::s;
 
 pub(crate) type Solution = fn(&str) -> (String, String);
 
@@ -127,8 +126,6 @@ impl AocStatus {
     fn validate_part(site_result: &str, provided_result: &str) {
         let provided_result = provided_result.to_string();
         let matches = provided_result == site_result;
-        let val_sym =
-            if matches {} else {};
         if matches {
             print!("✅");
         } else {
