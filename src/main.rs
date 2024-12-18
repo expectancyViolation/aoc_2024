@@ -30,6 +30,7 @@ mod y16_day23;
 mod y16_day24;
 mod y16_day25;
 mod day18;
+mod day18_bfs;
 
 use cached::proc_macro::io_cached;
 use itertools::Itertools;
@@ -178,24 +179,26 @@ fn main_2024() {
             (15, day15_bits::solve),
             (16, day16::solve),
             (17, day17::solve),
+            (18,day18::solve),
+            (18,day18_bfs::solve),
         ];
 
-        // let mut results = vec![];
-        //
-        // for (day, solver) in solves {
-        //     let res = run_solve(&client, &aoc_user, day, solver).await;
-        //     results.push(res);
-        // }
-        //
-        // let mut total_micros = 0;
-        // for res in results {
-        //     println!("{}", res);
-        //     total_micros += res.elapsed_micros;
-        // }
-        //
-        // println!("Total solve time: {} μs", total_micros);
-        let res = run_solve(&client, &aoc_user, 18, day18::solve).await;
-        println!("{}", res);
+        let mut results = vec![];
+
+        for (day, solver) in solves {
+            let res = run_solve(&client, &aoc_user, day, solver).await;
+            results.push(res);
+        }
+
+        let mut total_micros = 0;
+        for res in results {
+            println!("{}", res);
+            total_micros += res.elapsed_micros;
+        }
+
+        println!("Total solve time: {} μs", total_micros);
+        //let res = run_solve(&client, &aoc_user, 18, day18_bfs::solve).await;
+        //println!("{}", res);
     })
 }
 
@@ -218,7 +221,7 @@ fn main() {
     //main_2016();
     //let stdin = io::read_to_string(io::stdin()).unwrap();
     // let started = Instant::now();
-    //let res = day16::solve(stdin.as_str());
+    //let res = day18_bfs::solve(stdin.as_str());
     // let elapsed_micros = started.elapsed().as_micros();
-    //println!("day16 result:{:?}", res);
+    //println!("day18 result:{:?}", res);
 }

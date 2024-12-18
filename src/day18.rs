@@ -1,14 +1,13 @@
 use crate::str_map::DIRECTIONS;
-use hashbrown::HashSet;
 use itertools::{iproduct, Itertools};
 use std::ops::ControlFlow;
-use union_find::{QuickUnionUf, UnionBySize, UnionFind};
+use union_find::{QuickUnionUf, UnionByRank, UnionFind};
 
 pub(crate) fn solve(data: &str) -> (i64, i64) {
     let mut p1 = 0;
     const W: i32 = 71;
-    let mut blocked = [[false; W as usize]; W as usize];
-    let mut comps: QuickUnionUf<UnionBySize> = QuickUnionUf::new(((W + 2) * (W + 2)) as usize);
+    let mut blocked = vec![vec![false; W as usize]; W as usize];
+    let mut comps: QuickUnionUf<UnionByRank> = QuickUnionUf::new(((W + 2) * (W + 2)) as usize);
     let (mut cx, mut cy) = (0, -1);
     let (mut dx, mut dy) = (1, 0);
     let (mut px, mut py) = (cx, cy);
@@ -51,15 +50,14 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
             return ControlFlow::Break((x, y));
         }
         if j == 1024 {
-            let mut frontier = HashSet::new();
-            frontier.insert((0, 0));
-            let mut distances = [[-1; W]; W];
+            let mut frontier = vec![(0, 0)];
+            let mut distances = vec![vec![-1; W as usize]; W as usize];
             distances[0][0] = 0;
             for i in 1.. {
                 if frontier.is_empty() {
                     break;
                 }
-                let mut nf = HashSet::new();
+                let mut nf = vec![];
                 for (x, y) in frontier.iter() {
                     for (dx, dy) in DIRECTIONS {
                         let (nx, ny) = (x + dx, y + dy);
@@ -68,17 +66,17 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
                                 && distances[nx as usize][ny as usize] == -1
                             {
                                 distances[nx as usize][ny as usize] = i;
-                                nf.insert((nx, ny));
+                                nf.push((nx, ny));
                             }
                         }
                     }
                 }
                 frontier = nf;
             }
-            p1 = distances[70][70];
+            p1 = distances[(W as usize) - 1][(W as usize) - 1];
         }
         ControlFlow::Continue(())
     });
     let p2 = res.break_value().unwrap();
-    (p1, (p2.0 * 100 + p2.1) as i64)
+    (p1, (p2.0 * 10000 + p2.1) as i64)
 }
