@@ -126,7 +126,7 @@ pub(crate) fn solve(data: &str) -> (i64, i64) {
             if m.get(nx, ny) == b'#' {
                 continue;
             }
-            step_to_next_crossing(&m, nx, ny, new_rot).map(|(s, cost, counts)| {
+            step_to_next_crossing(&m, nx, ny, new_rot).map(|(s, cost, _counts)| {
                 if distances[((s.0 * w + s.1) * 4) as usize + s.2] == -1 {
                     let new_dist = 1 + dist.0 + cost + (rot % 2) as i32 * 1000;
                     frontier.push_increase(s, Reverse(new_dist));

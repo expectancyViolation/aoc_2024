@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 mod aoc;
 mod day01;
 mod day02;
@@ -179,9 +180,9 @@ fn main_2024() {
             (15, day15_bits::solve),
             (16, day16::solve),
             (17, day17::solve),
-            (18,day18::solve),
-            (18,day18_bfs::solve),
-            (18,day18_weird_input::solve),
+            (18, day18::solve),
+            (18, day18_bfs::solve),
+            (18, day18_weird_input::solve),
         ];
 
         let mut results = vec![];

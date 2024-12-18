@@ -1,5 +1,4 @@
 use crate::y16_assembunny::{AssembunnyState, Instruction};
-use rayon::prelude::*;
 
 
 pub(crate) fn solve(data: &str) -> (i64, i64) {

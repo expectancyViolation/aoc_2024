@@ -1,4 +1,3 @@
-
 use hashbrown::HashMap;
 use itertools::Itertools;
 use rayon::prelude::*;
@@ -15,47 +14,50 @@ struct Day06Guard {
     facing_index: usize,
 }
 
+
+const MAX_WIDTH: usize = 140;
+
 #[derive(Debug, Clone)]
 struct HitMap {
     // facing x  map y coord to sorted x
-    pub x_blocks: HashMap<i32, Vec<i32>>,
+    pub x_blocks: Vec<Vec<i32>>,
 
     // facing y  map x coord to sorted y
-    pub y_blocks: HashMap<i32, Vec<i32>>,
+    pub y_blocks: Vec<Vec<i32>>,
 }
 
 impl HitMap {
     fn add_entry(&mut self, x: i32, y: i32) {
-        let x_row = self.x_blocks.entry(y).or_insert(Vec::new());
-        let y_row = self.y_blocks.entry(x).or_insert(Vec::new());
+        let x_row = &mut self.x_blocks[y as usize];
+        let y_row = &mut self.y_blocks[x as usize];
         x_row.push(x);
         y_row.push(y);
         x_row.sort();
         y_row.sort();
     }
     fn remove_entry(&mut self, x: i32, y: i32) {
-        let x_row = self.x_blocks.entry(y).or_insert(Vec::new());
-        let y_row = self.y_blocks.entry(x).or_insert(Vec::new());
+        let x_row = &mut self.x_blocks[y as usize];
+        let y_row = &mut self.y_blocks[x as usize];
         let (x_ind, _) = x_row.iter().find_position(|&&xx| xx == x).unwrap();
         let (y_ind, _) = y_row.iter().find_position(|&&yy| yy == y).unwrap();
         x_row.remove(x_ind);
         y_row.remove(y_ind);
     }
     fn from_hashset(occupied: &HashSet<(i32, i32)>) -> HitMap {
-        let mut x_blocks = HashMap::new();
-        let mut y_blocks = HashMap::new();
+        let mut x_blocks = vec![Vec::new(); MAX_WIDTH];
+        let mut y_blocks = vec![Vec::new(); MAX_WIDTH];
         occupied.iter().for_each(|&(x, y)| {
-            let x_row = x_blocks.entry(y).or_insert(Vec::new());
-            let y_row = y_blocks.entry(x).or_insert(Vec::new());
+            let x_row = &mut x_blocks[y as usize];
+            let y_row = &mut y_blocks[x as usize];
             x_row.push(x);
             y_row.push(y);
         });
 
-        x_blocks.iter_mut().for_each(|(_, v)| {
+        x_blocks.iter_mut().for_each(|v| {
             v.sort_unstable();
         });
 
-        y_blocks.iter_mut().for_each(|(_, v)| {
+        y_blocks.iter_mut().for_each(|v| {
             v.sort_unstable();
         });
 
@@ -65,50 +67,39 @@ impl HitMap {
         match guard.facing_index {
             0 => {
                 // moving up
-                self.x_blocks.get(&guard.y)
-                    .and_then(|x_co| {
-                        let x_part = x_co.partition_point(|x| x <= &guard.x);
-                        x_co.get(x_part - 1).map(|nx| {
-                            guard.x = nx + 1;
-                            guard.facing_index = 1;
-                        })
-                    })
-                    .is_some()
+                let x_co = &self.x_blocks[guard.y as usize];
+                let x_part = x_co.partition_point(|x| x <= &guard.x);
+                x_co.get(x_part - 1).map(|nx| {
+                    guard.x = nx + 1;
+                    guard.facing_index = 1;
+                }).is_some()
             }
             2 => {
                 // moving down
-                self.x_blocks.get(&guard.y)
-                    .and_then(|x_co| {
-                        let x_part = x_co.partition_point(|x| x <= &guard.x);
-                        x_co.get(x_part).map(|nx| {
-                            guard.x = nx - 1;
-                            guard.facing_index = 3;
-                        })
-                    })
-                    .is_some()
+                let x_co = &self.x_blocks[guard.y as usize];
+                let x_part = x_co.partition_point(|x| x <= &guard.x);
+                x_co.get(x_part).map(|nx| {
+                    guard.x = nx - 1;
+                    guard.facing_index = 3;
+                }).is_some()
             }
             3 => {
                 // moving left
-                self.y_blocks.get(&guard.x)
-                    .and_then(|y_co| {
-                        let y_part = y_co.partition_point(|y| y <= &guard.y);
-                        y_co.get(y_part - 1).map(|ny| {
-                            guard.y = ny + 1;
-                            guard.facing_index = 0;
-                        })
-                    })
-                    .is_some()
+                let y_co = &self.y_blocks[guard.x as usize];
+                let y_part = y_co.partition_point(|y| y <= &guard.y);
+                y_co.get(y_part - 1).map(|ny| {
+                    guard.y = ny + 1;
+                    guard.facing_index = 0;
+                }).is_some()
             }
             1 => {
                 // moving down
-                self.y_blocks.get(&guard.x)
-                    .and_then(|y_co| {
-                        let y_part = y_co.partition_point(|y| y <= &guard.y);
-                        y_co.get(y_part).map(|ny| {
-                            guard.y = ny - 1;
-                            guard.facing_index = 2;
-                        })
-                    })
+                let y_co = &self.y_blocks[guard.x as usize];
+                let y_part = y_co.partition_point(|y| y <= &guard.y);
+                y_co.get(y_part).map(|ny| {
+                    guard.y = ny - 1;
+                    guard.facing_index = 2;
+                })
                     .is_some()
             }
             _ => unreachable!(),
