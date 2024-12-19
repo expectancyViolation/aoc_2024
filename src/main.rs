@@ -23,6 +23,7 @@ use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::runtime::Runtime;
 use crate::year16::{day12, day24, day25};
+use crate::year24::day19;
 
 fn prepare_client(aoc_session: &str) -> Client {
     let cookie_store = Arc::new(Jar::default());
@@ -135,6 +136,7 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
         let client = AocClient::for_year(prepare_client(&aoc_session), year);
 
 
+        /*
         let mut results = vec![];
 
         for &(day, solver) in solves {
@@ -155,9 +157,11 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
             total_micros += res.elapsed_micros;
         }
 
-        println!("Total solve time: {} μs", total_micros);
-        //let res = run_solve(&client, &aoc_user, 18, day18_bfs::solve).await;
-        //println!("{}", res);
+        println!("Total solve time: {} μs", total_micros); */
+
+        let res = run_solve(&client, &aoc_user, 19, day19::solve).await;
+
+        println!("{}", res);
     })
 }
 

@@ -29,7 +29,7 @@ pub(crate) mod day18;
 pub(crate) mod day18_bfs;
 
 pub(crate) mod day18_weird_input;
-mod day19;
+pub(crate) mod day19;
 
 
 lazy_static! {
