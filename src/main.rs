@@ -14,7 +14,7 @@ use reqwest::{Client, Url};
 use std::fmt::{Debug, Display};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use std::str;
+use std::{io, str};
 use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse, AocSolveResult, AocStatus, Solution};
@@ -136,7 +136,6 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
         let client = AocClient::for_year(prepare_client(&aoc_session), year);
 
 
-        /*
         let mut results = vec![];
 
         for &(day, solver) in solves {
@@ -157,11 +156,11 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
             total_micros += res.elapsed_micros;
         }
 
-        println!("Total solve time: {} μs", total_micros); */
+        println!("Total solve time: {} μs", total_micros);
 
-        let res = run_solve(&client, &aoc_user, 19, day19::solve).await;
+        //let res = run_solve(&client, &aoc_user, 19, day19::solve).await;
 
-        println!("{}", res);
+        //println!("{}", res);
     })
 }
 
@@ -182,10 +181,8 @@ fn main_2016() {
 fn main() {
     let solves: Vec<(i64, Solution)> = year24::SOLVES.to_vec();
     benchmark_year(2024, &solves);
-    main_2016();
+    //main_2016();
     //let stdin = io::read_to_string(io::stdin()).unwrap();
-    // let started = Instant::now();
-    //let res = day18_bfs::solve(stdin.as_str());
-    // let elapsed_micros = started.elapsed().as_micros();
-    //println!("day18 result:{:?}", res);
+    //let res = day19::solve(stdin.as_str());
+    //println!("day19 result:{:?}", res);
 }
