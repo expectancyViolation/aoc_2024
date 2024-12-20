@@ -1,26 +1,24 @@
 use crate::str_map::{StrMap, DIRECTIONS};
-use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
+use rayon::iter::IndexedParallelIterator;
 
-fn bfs(start: (i32, i32), m: &StrMap) -> HashMap<(i32, i32), i32> {
-    let mut distances = HashMap::new();
-    let mut frontier = HashSet::new();
-    frontier.insert(start);
-    distances.insert(start, 0);
+fn bfs(start: (i32, i32), m: &StrMap) -> Vec<Vec<i32>> {
+    let mut distances = vec![vec![-1; m.w as usize]; m.h as usize];
+    let mut frontier = vec![start];
+    distances[start.0 as usize][start.1 as usize] = 0;
     while !frontier.is_empty() {
-        let mut nf = HashSet::new();
+        let mut nf = Vec::new();
         for (x, y) in frontier {
-            let dist = distances[&(x, y)];
             for (dx, dy) in DIRECTIONS {
                 let (nx, ny) = (x + dx, y + dy);
                 let sym = m.get(nx, ny);
-                if !distances.contains_key(&(nx, ny))
-                    && ((sym == b'.') || (sym == b'S') || (sym == b'E'))
+                if distances[nx as usize][ny as usize] == -1
+                    && ((sym == b'.'))
                 {
-                    nf.insert((nx, ny));
-                    distances.insert((nx, ny), dist + 1);
+                    nf.push((nx, ny));
+                    distances[nx as usize][ny as usize] = distances[x as usize][y as usize] + 1;
                 }
             }
         }
@@ -37,30 +35,40 @@ pub(crate) fn solve(data: &str) -> (String, String) {
     let end_pos = (end / (w + 1), end % (w + 1));
     let start_pos = (start / (w + 1), start % (w + 1));
     let mut data = String::from(data).into_bytes();
-    let m = StrMap {
+    let mut m = StrMap {
         data: data.as_mut_slice(),
         w,
         h,
     };
+    m.set(start_pos.0, start_pos.1, b'.');
+    m.set(end_pos.0, end_pos.1, b'.');
     let d_start = bfs(start_pos, &m);
-    let d_end = bfs(end_pos, &m);
 
-    let total_dist = d_start[&end_pos];
-    let to_test = d_start.iter().collect_vec();
-
-    let sols: Vec<(i32, i32)> = to_test
-        .par_iter()
-        .map(|((px, py), &dist)| {
-            let mut p1 = 0;
-            let mut p2 = 0;
+    let sols = d_start.par_iter().enumerate().map(|(px, v)| {
+        let px = px as i32;
+        let mut p1 = 0;
+        let mut p2 = 0;
+        v.iter().enumerate().for_each(|(py, &dist)| {
+            if dist < 0 {
+                return;
+            }
+            let py = py as i32;
             for dx in -20..21 {
+                let ex = px + dx;
+                if ex < 0 || ex >= h {
+                    continue;
+                }
+                let mx = (px - ex).abs();
                 let adx = (dx as i32).abs();
                 for dy in (-20 + adx)..(21 - adx) {
-                    let (ex, ey) = (px + dx, py + dy);
-                    d_end.get(&(ex, ey)).map(|e_dist| {
-                        ;
-                        let d = (px - ex).abs() + (py - ey).abs();
-                        let curr_saved = total_dist - dist - e_dist - d;
+                    let ey = py + dy;
+                    if ey < 0 || ey >= w {
+                        continue;
+                    }
+                    let e_dist = d_start[ex as usize][ey as usize];
+                    if e_dist >= 0 {
+                        let d = mx + (py - ey).abs();
+                        let curr_saved = dist - e_dist - d;
                         if curr_saved >= 100 {
                             if d <= 2 {
                                 p1 += 1;
@@ -69,12 +77,12 @@ pub(crate) fn solve(data: &str) -> (String, String) {
                                 p2 += 1;
                             }
                         }
-                    });
+                    }
                 }
             }
-            (p1, p2)
-        })
-        .collect();
+        });
+        (p1, p2)
+    }).collect::<Vec<_>>();
 
     let (res, res2) = sols
         .into_iter()
