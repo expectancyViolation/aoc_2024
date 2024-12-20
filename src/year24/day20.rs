@@ -1,8 +1,10 @@
 use crate::str_map::{StrMap, DIRECTIONS};
 use hashbrown::{HashMap, HashSet};
+use itertools::Itertools;
+use rayon::iter::IntoParallelRefIterator;
+use rayon::iter::ParallelIterator;
 
-
-fn bfs(start: (i32, i32) m: &StrMap) -> HashMap<(i32, i32), i32> {
+fn bfs(start: (i32, i32), m: &StrMap) -> HashMap<(i32, i32), i32> {
     let mut distances = HashMap::new();
     let mut frontier = HashSet::new();
     frontier.insert(start);
@@ -14,14 +16,16 @@ fn bfs(start: (i32, i32) m: &StrMap) -> HashMap<(i32, i32), i32> {
             for (dx, dy) in DIRECTIONS {
                 let (nx, ny) = (x + dx, y + dy);
                 let sym = m.get(nx, ny);
-                if !distances.contains_key(&(nx, ny)) && ((sym == b'.') || (sym == b'S') || (sym == b'E')) {
+                if !distances.contains_key(&(nx, ny))
+                    && ((sym == b'.') || (sym == b'S') || (sym == b'E'))
+                {
                     nf.insert((nx, ny));
                     distances.insert((nx, ny), dist + 1);
                 }
             }
         }
         frontier = nf;
-    };
+    }
     distances
 }
 
@@ -42,26 +46,39 @@ pub(crate) fn solve(data: &str) -> (String, String) {
     let d_end = bfs(end_pos, &m);
 
     let total_dist = d_start[&end_pos];
-    println!("total_dist: {}", total_dist);
+    let to_test = d_start.iter().collect_vec();
 
-    let mut res = 0;
-    let mut res2 = 0;
-    for (&(px, py), dist) in d_start.iter() {
-        for (&(ex, ey), e_dist) in d_end.iter() {
-            let d = (px - ex).abs() + (py - ey).abs();
-            let curr_saved = total_dist - dist - e_dist - d;
-            if d <= 2 {
-                if curr_saved >= 100 {
-                    res += 1;
+    let sols: Vec<(i32, i32)> = to_test
+        .par_iter()
+        .map(|((px, py), &dist)| {
+            let mut p1 = 0;
+            let mut p2 = 0;
+            for dx in -20..21 {
+                let adx = (dx as i32).abs();
+                for dy in (-20 + adx)..(21 - adx) {
+                    let (ex, ey) = (px + dx, py + dy);
+                    d_end.get(&(ex, ey)).map(|e_dist| {
+                        ;
+                        let d = (px - ex).abs() + (py - ey).abs();
+                        let curr_saved = total_dist - dist - e_dist - d;
+                        if curr_saved >= 100 {
+                            if d <= 2 {
+                                p1 += 1;
+                            }
+                            if d <= 20 {
+                                p2 += 1;
+                            }
+                        }
+                    });
                 }
             }
-            if d <= 20 {
-                if curr_saved >= 100 {
-                    res2 += 1;
-                }
-            }
-        }
-    }
+            (p1, p2)
+        })
+        .collect();
+
+    let (res, res2) = sols
+        .into_iter()
+        .fold((0, 0), |(p11, p21), (p12, p22)| (p11 + p12, p21 + p22));
 
     (res.to_string(), res2.to_string())
 }
