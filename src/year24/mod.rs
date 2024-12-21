@@ -32,7 +32,7 @@ pub(crate) mod day18_weird_input;
 pub(crate) mod day19;
 pub(crate) mod day20;
 pub(crate) mod day20_fw;
-pub(crate) mod day21_lut;
+pub(crate) mod day21;
 mod day21_regular;
 
 lazy_static! {
@@ -61,6 +61,6 @@ lazy_static! {
     //(18, day18_weird_input::solve),
     (19,day19::solve),
     (20,day20::solve),
-    (21,day21_lut::solve)
+    (21,day21::solve)
 ];
 }

@@ -23,7 +23,7 @@ use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::runtime::Runtime;
 use crate::year16::{day12, day24, day25};
-use crate::year24::{day19, day20, day21_lut};
+use crate::year24::{day19, day20, day21};
 
 fn prepare_client(aoc_session: &str) -> Client {
     let cookie_store = Arc::new(Jar::default());
