@@ -1,3 +1,5 @@
+use num::PrimInt;
+
 // from https://raw.githubusercontent.com/TheAlgorithms/Rust/refs/heads/master/src/math/extended_euclidean_algorithm.rs
 fn update_step(a: &mut i32, old_a: &mut i32, quotient: i32) {
     let temp = *a;
@@ -43,3 +45,67 @@ pub fn chinese_remainder_theorem(residues: &[i32], modulli: &[i32]) -> Option<i3
     }
     Some(sum % prod)
 }
+
+
+pub struct FenwickTree {
+    pub data: Vec<i64>,
+}
+
+impl FenwickTree {
+    pub fn new(size: usize) -> FenwickTree {
+        FenwickTree { data: vec![0; size] }
+    }
+
+    pub fn query(&self, index: usize) -> i64 {
+        let mut index = index;
+        let mut res = 0;
+        while index > 0 {
+            res += self.data[index];
+            index -= 1 << index.trailing_zeros();
+        }
+        res
+    }
+
+    pub fn update(&mut self, index: usize, value: i64) {
+        let mut index = index;
+        while index < self.data.len() {
+            self.data[index] += value;
+            index += 1 << index.trailing_zeros();
+        }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use rand::rngs::StdRng;
+    use rand::{Rng, SeedableRng};
+    use crate::util::FenwickTree;
+
+    #[test]
+    fn fenwick_works() {
+        let mut rng = StdRng::seed_from_u64(222);
+        let ts: usize = 99;
+        let mut fw = FenwickTree::new(ts);
+        let mut test_vec = vec![0; ts];
+        let mut test_data: Vec<(usize, i64)> = Vec::new();
+        for _ in 0..20 {
+            test_data.push((rng.random_range(0..ts), rng.random_range(0..10000)))
+        }
+        for &(i, x) in test_data.iter() {
+            fw.update(i, x);
+            test_vec[i] += x;
+            for k in 0..ts-1 {
+                let fw_sum = fw.query(k);
+                let slow_sum = test_vec[..k+1].iter().sum::<i64>();
+                //println!("{:?} {:?} ",fw_sum, slow_sum);
+                //println!("{:?}",test_vec);
+                //println!("{:?}",fw.data);
+                assert_eq!(fw_sum, slow_sum);
+            }
+        }
+    }
+}
+
+
+

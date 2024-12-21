@@ -29,7 +29,7 @@ fn bfs(start: (i32, i32), m: &StrMap) -> Vec<Vec<i32>> {
 
 pub(crate) fn solve(data: &str) -> (String, String) {
     let w = data.lines().next().unwrap().len() as i32;
-    let h = data.lines().count() as i32;
+    let h = data.len() as i32 /(w+1);
     let start = data.find('S').unwrap() as i32;
     let end = data.find('E').unwrap() as i32;
     let end_pos = (end / (w + 1), end % (w + 1));
@@ -53,14 +53,15 @@ pub(crate) fn solve(data: &str) -> (String, String) {
                 return;
             }
             let py = py as i32;
-            for dx in -20..21 {
+            for dx in 0..21 {
                 let ex = px + dx;
                 if ex < 0 || ex >= h {
                     continue;
                 }
                 let mx = (px - ex).abs();
-                let adx = (dx as i32).abs();
-                for dy in (-20 + adx)..(21 - adx) {
+                let adx = dx.abs();
+                let lower=if (dx>0) {-20+adx} else {0};
+                for dy in lower..(21 - adx) {
                     let ey = py + dy;
                     if ey < 0 || ey >= w {
                         continue;
@@ -68,14 +69,12 @@ pub(crate) fn solve(data: &str) -> (String, String) {
                     let e_dist = d_start[ex as usize][ey as usize];
                     if e_dist >= 0 {
                         let d = mx + (py - ey).abs();
-                        let curr_saved = dist - e_dist - d;
-                        if curr_saved >= 100 {
-                            if d <= 2 {
+                        let diff=(dist-e_dist).abs()-d;
+                        if diff>=100 {
+                            if d<=2 {
                                 p1 += 1;
                             }
-                            if d <= 20 {
-                                p2 += 1;
-                            }
+                            p2 += 1;
                         }
                     }
                 }

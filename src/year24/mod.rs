@@ -31,6 +31,8 @@ pub(crate) mod day18_bfs;
 pub(crate) mod day18_weird_input;
 pub(crate) mod day19;
 pub(crate) mod day20;
+pub(crate) mod day20_fw;
+pub(crate) mod day21;
 
 lazy_static! {
  pub(crate) static ref SOLVES: Vec<(i64,Solution )> = vec![
@@ -56,6 +58,8 @@ lazy_static! {
     (18, day18::solve),
     (18, day18_bfs::solve),
     (18, day18_weird_input::solve),
-    (19,day19::solve)
+    (19,day19::solve),
+    (20,day20::solve),
+    (20,day20_fw::solve)
 ];
 }
