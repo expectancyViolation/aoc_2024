@@ -16,24 +16,6 @@ fn find_keymap(keymap: &Keymap, c: char) -> (i32, i32) {
     panic!("Keymap doesn't contain a character!");
 }
 
-// fn type_keycode(code: &str, keymap: &Keymap) -> String {
-//     let (mut x, mut y) = find_keymap(keymap, 'A');
-//     let mut res = Vec::new();
-//     for c in code.chars() {
-//         match c {
-//             '^' => { x -= 1 }
-//             'v' => { x += 1 }
-//             '>' => { y += 1 }
-//             '<' => { y -= 1 }
-//             'A' => {
-//                 res.push(keymap[x as usize][y as usize]);
-//             }
-//             _ => unreachable!()
-//         }
-//     };
-//     res.into_iter().collect()
-// }
-
 type CharSeqIt<'a> = Box<dyn Iterator<Item=String> + 'a>;
 
 #[derive(Debug, Copy, Clone)]
@@ -143,17 +125,15 @@ pub fn solve_keycode(code: &str, depth: i32, initial: bool) -> i128 {
 
 
 pub fn solve(data: &str) -> (String, String) {
-    println!("Solving `{}`...", data);
-    let mut total = 0;
+    let mut p1 = 0;
+    let mut p2 = 0;
     for inp in data.lines() {
-        println!("---------------");
-        println!("Solving `{}`...", inp);
         let numval = inp[..3].parse::<i128>().unwrap();
-        let code_len = solve_keycode(inp, 26, true);
-        //println!("sol {}", sol);
-        let complexity = (code_len) * numval;
-        total += complexity;
-        println!("Solving `{} {}`...", code_len, numval);
+
+        let p1_code_len = solve_keycode(inp, 3, true);
+        let p2_code_len = solve_keycode(inp, 26, true);
+        p1 += numval + p1_code_len;
+        p2 += numval + p2_code_len;
     }
-    (total.to_string(), 0.to_string())
+    (p1.to_string(), p2.to_string())
 }
