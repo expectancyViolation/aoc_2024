@@ -183,6 +183,7 @@ fn main() {
     benchmark_year(2024, &solves);
     //main_2016();
     //let stdin = io::read_to_string(io::stdin()).unwrap();
-    //let res = day19::solve(stdin.as_str());
-    //println!("day19 result:{:?}", res);
+    //let started=Instant::now();
+    //let res = day21::solve(stdin.as_str());
+    //println!("day21 result:{:?} {}", res,started.elapsed().as_micros());
 }

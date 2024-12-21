@@ -1,5 +1,4 @@
 use crate::str_map::{StrMap, DIRECTIONS};
-use itertools::Itertools;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 use rayon::iter::IndexedParallelIterator;
@@ -60,7 +59,7 @@ pub(crate) fn solve(data: &str) -> (String, String) {
                 }
                 let mx = (px - ex).abs();
                 let adx = dx.abs();
-                let lower=if (dx>0) {-20+adx} else {0};
+                let lower=if dx>0 {-20+adx} else {0};
                 for dy in lower..(21 - adx) {
                     let ey = py + dy;
                     if ey < 0 || ey >= w {
