@@ -185,6 +185,6 @@ fn main() {
     //main_2016();
     //let stdin = io::read_to_string(io::stdin()).unwrap();
     //let started=Instant::now();
-    //let res = day21::solve(stdin.as_str());
-    //println!("day21 result:{:?} {}", res,started.elapsed().as_micros());
+    //let res = day22::solve(stdin.as_str());
+    //println!("day22 result:{:?} {}", res,started.elapsed().as_micros());
 }

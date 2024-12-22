@@ -1,5 +1,6 @@
-use hashbrown::HashMap;
-use itertools::Itertools;
+use hashbrown::{HashMap, HashSet};
+use itertools::{iterate, Itertools};
+use std::iter;
 
 const M: i64 = 1 << 24;
 fn evolve(num: i64) -> i64 {
@@ -8,48 +9,46 @@ fn evolve(num: i64) -> i64 {
     (num ^ (num << 11)) % M
 }
 
-fn solve_bananas(num: i64) -> HashMap<(i64, i64, i64, i64), i64> {
-    let mut num = num;
-    let mut res = HashMap::new();
-    let mut diffs: Vec<i64> = vec![0; 4];
-    for i in 0..2000 {
-        let next_num = evolve(num);
-        let curr_val = num % 10;
-        let next_val = next_num % 10;
-        let mut diffs_ = diffs[1..].into_iter().cloned().collect_vec();
-        diffs_.push((next_val - curr_val));
-        let difftup = (diffs_[0], diffs_[1], diffs_[2], diffs_[3]);
-        if i >= 3 {
-            if !res.contains_key(&difftup) {
-                res.insert(difftup, next_val);
+const DT_LEN: usize = 20 * 20 * 20 * 20;
+const D1: usize = 20 * 20 * 20;
+const D2: usize = 20 * 20;
+const D3: usize = 20;
+
+const D1234: usize = D1 + D2 + D3 + 1;
+type BananaArr = [i32; DT_LEN];
+fn solve_bananas(num: i64, hm: &mut BananaArr) -> i64 {
+    let mut seen: [bool; DT_LEN] = [false; DT_LEN];
+    let mut res = 0;
+    let m = iterate(num, |num: &i64| evolve(*num))
+        .inspect(|x| res = *x)
+        .map(|x| (x % 10) as usize);
+    m.take(2001)
+        .tuple_windows::<(_, _, _, _, _)>()
+        .for_each(|(x0, x1, x2, x3, x4)| {
+            let difftup =
+                D1 * (10 + x1 - x0) + D2 * (10 + x2 - x1) + D3 * (10 + x3 - x2) + (10 + x4 - x3);
+            // let difftup = D1 * x1 + D2 * x2 + D3 * x3 + x4 + D1234 * (10 - x0);
+            if !seen[difftup] {
+                seen[difftup] = true;
+                hm[difftup] += x4 as i32;
             }
-        }
-        diffs = diffs_;
-        num = next_num;
-    };
+        });
     res
 }
 
 pub(crate) fn solve(data: &str) -> (String, String) {
-    let nums = data.lines().map(|x| x.parse::<i64>().unwrap()).collect_vec();
+    let nums = data
+        .lines()
+        .map(|x| x.parse::<i64>().unwrap())
+        .collect_vec();
 
-    let p1 = nums.iter().map(|&n| {
-        let mut num = n;
-        for _ in 0..2000 {
-            num = evolve(num);
-        }
-        num
-    }).sum::<i64>();
+    println!("nums: {:?}", nums.len());
 
-    let mut total_bmh: HashMap<_, i64> = HashMap::new();
-    nums.iter().for_each(|&n| {
-        let mut num = n;
-        let bmh = solve_bananas(num);
-        for (k, v) in bmh {
-            let e = total_bmh.entry(k).or_insert(0);
-            *e += v;
-        }
-    });
+    let mut total_bmh: BananaArr = [0; DT_LEN];
+    let p1 = nums
+        .iter()
+        .map(|&n| solve_bananas(n, &mut total_bmh))
+        .sum::<i64>();
 
-    (p1.to_string(), total_bmh.values().max().unwrap().to_string())
+    (p1.to_string(), total_bmh.iter().max().unwrap().to_string())
 }
