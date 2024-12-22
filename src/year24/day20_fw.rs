@@ -34,6 +34,7 @@ fn bfs(start: (i32, i32), m: &StrMap) -> Vec<Vec<i32>> {
     distances
 }
 
+/*
 pub(crate) fn solve(data: &str) -> (String, String) {
     let w = data.lines().next().unwrap().len() as i32;
     let h = data.len() as i32 / (w + 1);
@@ -87,3 +88,4 @@ pub(crate) fn solve(data: &str) -> (String, String) {
 
     ("".to_string(),res.to_string())
 }
+*/
