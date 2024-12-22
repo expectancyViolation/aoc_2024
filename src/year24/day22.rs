@@ -1,6 +1,7 @@
-use hashbrown::{HashMap, HashSet};
 use itertools::{iterate, Itertools};
-use std::iter;
+use rayon::iter::ParallelIterator;
+use rayon::prelude::IntoParallelRefIterator;
+use std::sync::{Arc, Mutex};
 
 const M: i64 = 1 << 24;
 fn evolve(num: i64) -> i64 {
@@ -9,14 +10,14 @@ fn evolve(num: i64) -> i64 {
     (num ^ (num << 11)) % M
 }
 
-const DT_LEN: usize = 20 * 20 * 20 * 20;
-const D1: usize = 20 * 20 * 20;
-const D2: usize = 20 * 20;
-const D3: usize = 20;
-
+const N_DIGS: usize = 19;
+const OFFSET: usize = 9;
+const D3: usize = N_DIGS;
+const D2: usize = N_DIGS * D3;
+const D1: usize = N_DIGS * D2;
+const DT_LEN: usize = N_DIGS * D1;
 const D1234: usize = D1 + D2 + D3 + 1;
-type BananaArr = [i32; DT_LEN];
-fn solve_bananas(num: i64, hm: &mut BananaArr) -> i64 {
+fn solve_bananas(num: i64, seq_counts: &mut Vec<i32>) -> i64 {
     let mut seen: [bool; DT_LEN] = [false; DT_LEN];
     let mut res = 0;
     let m = iterate(num, |num: &i64| evolve(*num))
@@ -26,29 +27,43 @@ fn solve_bananas(num: i64, hm: &mut BananaArr) -> i64 {
         .tuple_windows::<(_, _, _, _, _)>()
         .for_each(|(x0, x1, x2, x3, x4)| {
             let difftup =
-                D1 * (10 + x1 - x0) + D2 * (10 + x2 - x1) + D3 * (10 + x3 - x2) + (10 + x4 - x3);
-            // let difftup = D1 * x1 + D2 * x2 + D3 * x3 + x4 + D1234 * (10 - x0);
+                D1 * (OFFSET + x1 - x0) + D2 * (OFFSET + x2 - x1) + D3 * (OFFSET + x3 - x2) + (OFFSET + x4 - x3);
             if !seen[difftup] {
                 seen[difftup] = true;
-                hm[difftup] += x4 as i32;
+                seq_counts[difftup] += x4 as i32;
             }
         });
     res
 }
 
 pub(crate) fn solve(data: &str) -> (String, String) {
+    let l = data.lines().count();
     let nums = data
         .lines()
         .map(|x| x.parse::<i64>().unwrap())
-        .collect_vec();
+        .chunks(l / 20)
+        .into_iter()
+        .map(|c| c.collect_vec())
+        .collect::<Vec<_>>();
 
-    println!("nums: {:?}", nums.len());
-
-    let mut total_bmh: BananaArr = [0; DT_LEN];
+    let total_total = Arc::new(Mutex::new([0; DT_LEN]));
     let p1 = nums
-        .iter()
-        .map(|&n| solve_bananas(n, &mut total_bmh))
+        .par_iter()
+        .map(|ns| {
+            let mut chunk_total = vec![0; DT_LEN];
+            let mut res = 0;
+            for n in ns.iter() {
+                res += solve_bananas(*n, &mut chunk_total);
+            }
+            let mut data = total_total.lock().unwrap();
+            for i in 0..chunk_total.len() {
+                data[i] += chunk_total[i];
+            }
+            res
+        })
         .sum::<i64>();
 
-    (p1.to_string(), total_bmh.iter().max().unwrap().to_string())
+    let tt = total_total.lock().unwrap();
+    let p2 = tt.iter().max().unwrap();
+    (p1.to_string(), p2.to_string())
 }

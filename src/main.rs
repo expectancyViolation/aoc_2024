@@ -184,7 +184,6 @@ fn main() {
     benchmark_year(2024, &solves);
     //main_2016();
     //let stdin = io::read_to_string(io::stdin()).unwrap();
-    //let started=Instant::now();
     //let res = day22::solve(stdin.as_str());
-    //println!("day22 result:{:?} {}", res,started.elapsed().as_micros());
+    //println!("day22 result:{:?}", res);
 }
