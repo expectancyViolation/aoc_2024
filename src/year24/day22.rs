@@ -17,7 +17,7 @@ const D2: usize = N_DIGS * D3;
 const D1: usize = N_DIGS * D2;
 const DT_LEN: usize = N_DIGS * D1;
 const D1234: usize = D1 + D2 + D3 + 1;
-fn solve_bananas(num: i64, seq_counts: &mut Vec<i32>) -> i64 {
+fn solve_bananas(num: i64, seq_counts: &mut Vec<u16>) -> i64 {
     let mut seen: [bool; DT_LEN] = [false; DT_LEN];
     let mut res = 0;
     let m = iterate(num, |num: &i64| evolve(*num))
@@ -30,7 +30,7 @@ fn solve_bananas(num: i64, seq_counts: &mut Vec<i32>) -> i64 {
                 D1 * (OFFSET + x1 - x0) + D2 * (OFFSET + x2 - x1) + D3 * (OFFSET + x3 - x2) + (OFFSET + x4 - x3);
             if !seen[difftup] {
                 seen[difftup] = true;
-                seq_counts[difftup] += x4 as i32;
+                seq_counts[difftup] += x4 as u16;
             }
         });
     res

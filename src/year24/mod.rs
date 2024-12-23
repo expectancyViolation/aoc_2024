@@ -35,6 +35,10 @@ pub(crate) mod day20_fw;
 pub(crate) mod day21;
 mod day21_regular;
 pub(crate) mod day22;
+pub(crate) mod day22_quickjump;
+mod gf2_mod;
+pub(crate) mod day23_bron;
+pub(crate) mod day23;
 
 lazy_static! {
  pub(crate) static ref SOLVES: Vec<(i64,Solution )> = vec![

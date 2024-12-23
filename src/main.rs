@@ -9,21 +9,22 @@ mod year24;
 mod year16;
 
 use cached::proc_macro::io_cached;
+use galois_field_2pm::GaloisField;
 use reqwest::cookie::Jar;
 use reqwest::{Client, Url};
 use std::fmt::{Debug, Display};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use std::{io, str};
+use std::str;
 use thiserror::Error;
 
-use crate::aoc::{AocClient, AocDailyPart, AocResponse, AocSolveResult, AocStatus, Solution};
+use crate::aoc::{AocClient, AocDailyPart, AocResponse, AocSolveResult, Solution};
+use crate::year16::{day12, day24, day25};
+use crate::year24::{day23, day23_bron};
 use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::runtime::Runtime;
-use crate::year16::{day12, day24, day25};
-use crate::year24::{day19, day20, day21, day22};
 
 fn prepare_client(aoc_session: &str) -> Client {
     let cookie_store = Arc::new(Jar::default());
@@ -159,7 +160,9 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
 
         println!("Total solve time: {} μs", total_micros);*/
 
-        let res = run_solve(&client, &aoc_user, 22, day22::solve).await;
+        let res = run_solve(&client, &aoc_user, 23, day23::solve).await;
+
+        //let res = run_solve(&client, &aoc_user, 23, day23_bron::solve).await;
 
         println!("{}", res);
     })
@@ -182,8 +185,9 @@ fn main_2016() {
 fn main() {
     let solves: Vec<(i64, Solution)> = year24::SOLVES.to_vec();
     benchmark_year(2024, &solves);
+
     //main_2016();
     //let stdin = io::read_to_string(io::stdin()).unwrap();
-    //let res = day22::solve(stdin.as_str());
+    //let res = day22_quickjump::solve(stdin.as_str());
     //println!("day22 result:{:?}", res);
 }
