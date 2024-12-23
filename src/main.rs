@@ -18,9 +18,9 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use std::str;
 use thiserror::Error;
 
-use crate::aoc::{AocClient, AocDailyPart, AocResponse, AocSolveResult, Solution};
+use crate::aoc::{AocClient, AocDailyPart, AocResponse, AocSolveResult, AocStatus, Solution};
 use crate::year16::{day12, day24, day25};
-use crate::year24::{day23, day23_bron};
+use crate::year24::{day23, day23_bron, day23_weird_input};
 use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -160,9 +160,9 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
 
         println!("Total solve time: {} μs", total_micros);*/
 
-        let res = run_solve(&client, &aoc_user, 23, day23::solve).await;
+        //let res = run_solve(&client, &aoc_user, 23, day23_weird_input::solve).await;
 
-        //let res = run_solve(&client, &aoc_user, 23, day23_bron::solve).await;
+        let res = run_solve(&client, &aoc_user, 23, day23::solve).await;
 
         println!("{}", res);
     })
