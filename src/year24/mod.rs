@@ -70,6 +70,7 @@ lazy_static! {
     (21,day21::solve),
     (22,day22::solve),
     (23,day23::solve),
+      (23,day23_bron::solve),
     (23,day23_weird_input::solve)
 ];
 }

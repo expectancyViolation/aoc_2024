@@ -15,7 +15,7 @@ use reqwest::{Client, Url};
 use std::fmt::{Debug, Display};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use std::str;
+use std::{io, str};
 use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse, AocSolveResult, AocStatus, Solution};
@@ -162,7 +162,12 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
 
         //let res = run_solve(&client, &aoc_user, 23, day23_weird_input::solve).await;
 
+
         let res = run_solve(&client, &aoc_user, 23, day23::solve).await;
+
+        println!("{}", res);
+
+        let res = run_solve(&client, &aoc_user, 23, day23_bron::solve).await;
 
         println!("{}", res);
     })
@@ -187,7 +192,9 @@ fn main() {
     benchmark_year(2024, &solves);
 
     //main_2016();
-    //let stdin = io::read_to_string(io::stdin()).unwrap();
-    //let res = day22_quickjump::solve(stdin.as_str());
-    //println!("day22 result:{:?}", res);
+    let stdin = io::read_to_string(io::stdin()).unwrap();
+    let res = day23::solve(stdin.as_str());
+    println!("day23 result:{:?}", res);
+    //let res = day23_bron::solve(stdin.as_str());
+    //println!("day23 result:{:?}", res);
 }

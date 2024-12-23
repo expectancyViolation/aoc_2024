@@ -1,4 +1,6 @@
 use itertools::Itertools;
+use rand::prelude::{SliceRandom, StdRng};
+use rand::SeedableRng;
 use union_find::UnionFind;
 
 // input graph vertices all have degree 13
@@ -8,8 +10,10 @@ use union_find::UnionFind;
 // => no backtracking necessary
 pub(crate) fn solve(data: &str) -> (String, String) {
     let mut connections: Vec<Vec<usize>> = vec![Vec::new(); 26 * 26];
-
-    for line in data.lines() {
+    let mut lines=data.lines().collect_vec();
+    let mut rng = StdRng::from_os_rng();
+    lines.shuffle(&mut rng);
+    for line in lines.iter() {
         let b = line.bytes().collect_vec();
         let n1 = ((b[0] - b'a') as usize) * 26 + (b[1] - b'a') as usize;
 
