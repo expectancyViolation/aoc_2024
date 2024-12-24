@@ -19,8 +19,8 @@ use std::{io, str};
 use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse, AocSolveResult, AocStatus, Solution};
-use crate::year16::{day12, day24, day25};
-use crate::year24::{day23, day23_bron, day23_weird_input};
+use crate::year16::{day12,  day25};
+use crate::year24::{day23, day23_bron, day23_weird_input,day24};
 use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -163,11 +163,11 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
         //let res = run_solve(&client, &aoc_user, 23, day23_weird_input::solve).await;
 
 
-        let res = run_solve(&client, &aoc_user, 23, day23::solve).await;
+        //let res = run_solve(&client, &aoc_user, 23, day23::solve).await;
 
-        println!("{}", res);
+        //println!("{}", res);
 
-        let res = run_solve(&client, &aoc_user, 23, day23_bron::solve).await;
+        let res = run_solve(&client, &aoc_user, 24, day24::solve).await;
 
         println!("{}", res);
     })
@@ -182,7 +182,7 @@ fn main_2016() {
         let client = AocClient::for_year(prepare_client(&aoc_session), 2016);
 
         run_solve(&client, &aoc_user, 12, day12::solve).await;
-        run_solve(&client, &aoc_user, 24, day24::solve).await;
+        //run_solve(&client, &aoc_user, 24, day24::solve).await;
         run_solve(&client, &aoc_user, 25, day25::solve).await;
     });
 }
@@ -192,9 +192,9 @@ fn main() {
     benchmark_year(2024, &solves);
 
     //main_2016();
-    let stdin = io::read_to_string(io::stdin()).unwrap();
-    let res = day23::solve(stdin.as_str());
-    println!("day23 result:{:?}", res);
+    //let stdin = io::read_to_string(io::stdin()).unwrap();
+    //let res = day23::solve(stdin.as_str());
+    //println!("day23 result:{:?}", res);
     //let res = day23_bron::solve(stdin.as_str());
     //println!("day23 result:{:?}", res);
 }

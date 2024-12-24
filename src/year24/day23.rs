@@ -1,19 +1,24 @@
-use std::sync::{Arc, Mutex};
-use std::time::Instant;
 use bnum::BUint;
 use itertools::Itertools;
 use priority_queue::PriorityQueue;
 use rand::prelude::{SliceRandom, StdRng};
 use rand::SeedableRng;
-use rayon::prelude::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
+use rayon::prelude::IntoParallelRefIterator;
+use std::sync::{Arc, Mutex};
 
 type UINodeMask = BUint<11>; // 26*26 =676 < 64*11=724
 
 const NUM_LETTERS: usize = 26;
 
-fn bron_kerbosch(neighbors: &Vec<UINodeMask>, r: UINodeMask, p: UINodeMask, x: UINodeMask, res: &mut UINodeMask, collision: &mut bool)
-{
+fn bron_kerbosch(
+    neighbors: &Vec<UINodeMask>,
+    r: UINodeMask,
+    p: UINodeMask,
+    x: UINodeMask,
+    res: &mut UINodeMask,
+    collision: &mut bool,
+) {
     let mut x = x;
     let mut p = p;
     if p.is_zero() && x.is_zero() {
@@ -25,10 +30,12 @@ fn bron_kerbosch(neighbors: &Vec<UINodeMask>, r: UINodeMask, p: UINodeMask, x: U
             *collision = false;
         }
     };
-    let u = (p | x).trailing_zeros();
+    let mut cands = (p | x);
+    // bitset makes pivot selection difficult. just pick the lowest one
+    let mut cand = cands.trailing_zeros();
     let mut q = p;
-    if u < UINodeMask::BITS {
-        let nu = neighbors[u as usize];
+    if cand < UINodeMask::BITS {
+        let nu = neighbors[cand as usize];
         q = p & (!nu);
     }
     while !q.is_zero() {
@@ -42,27 +49,35 @@ fn bron_kerbosch(neighbors: &Vec<UINodeMask>, r: UINodeMask, p: UINodeMask, x: U
     }
 }
 
-fn bron_kerbosch_top(neighbors: &Vec<UINodeMask>, deg_ordered: &Vec<usize>, p: UINodeMask, res: &mut UINodeMask, collision: &mut bool)
-{
+fn bron_kerbosch_top(
+    neighbors: &Vec<UINodeMask>,
+    deg_ordered: &Vec<usize>,
+    p: UINodeMask,
+    res: &mut UINodeMask,
+    collision: &mut bool,
+) {
     let mut ps = Arc::new(Mutex::new(p));
     let mut xs = Arc::new(Mutex::new(UINodeMask::ZERO));
     let mut verts = (0..NUM_LETTERS * NUM_LETTERS).collect_vec();
     let mut rng = StdRng::from_os_rng();
     verts.shuffle(&mut rng);
-    let sols = deg_ordered.par_iter().map(|&v| {
-        let p = ps.lock().unwrap().clone();
-        let x = xs.lock().unwrap().clone();
-        let vm = UINodeMask::power_of_two(v as u32);
-        let nv = neighbors[v as usize];
-        let mut res = UINodeMask::ZERO;
-        let mut collision = false;
-        bron_kerbosch(neighbors, vm, p & nv, BUint::ZERO, &mut res, &mut collision);
-        let mut p = ps.lock().unwrap();
-        *p = *p ^ vm;
-        let mut x = xs.lock().unwrap();
-        *x = *x | vm;
-        (res, collision)
-    }).collect::<Vec<_>>();
+    let sols = deg_ordered
+        .par_iter()
+        .map(|&v| {
+            let p = ps.lock().unwrap().clone();
+            let x = xs.lock().unwrap().clone();
+            let vm = UINodeMask::power_of_two(v as u32);
+            let nv = neighbors[v];
+            let mut res = UINodeMask::ZERO;
+            let mut collision = false;
+            bron_kerbosch(neighbors, vm, p & nv, x, &mut res, &mut collision);
+            let mut p = ps.lock().unwrap();
+            *p = *p ^ vm;
+            let mut x = xs.lock().unwrap();
+            *x = *x | vm;
+            (res, collision)
+        })
+        .collect::<Vec<_>>();
     sols.iter().for_each(|&(r, c)| {
         if r.count_ones() == res.count_ones() {
             if r != *res {
@@ -120,8 +135,10 @@ pub(crate) fn solve(data: &str) -> (String, String) {
         neighbor_mask[n1] |= n2_mask;
         neighbor_mask[n2] |= n1_mask;
         if n1 < n2 {
+            //assert!(!neighbors[n1].contains(&n2));
             neighbors[n1].push(n2);
         } else {
+            //assert!(!neighbors[n2].contains(&n1));
             neighbors[n2].push(n1);
         }
     }
@@ -133,6 +150,7 @@ pub(crate) fn solve(data: &str) -> (String, String) {
                 for &k in neighbors[j].iter() {
                     if neighbors[i].contains(&k) {
                         // found triple
+                        assert!((i < j) && (j < k));
                         let t = (b't' - b'a') as usize;
                         let any_starts_with_t = (i / 26) == t || (j / 26) == t || (k / 26) == t;
                         if any_starts_with_t {
@@ -148,34 +166,55 @@ pub(crate) fn solve(data: &str) -> (String, String) {
     let solve_p2 = || {
         let mut res = UINodeMask::ZERO;
         let mut collision = false;
-        bron_kerbosch(&neighbor_mask, UINodeMask::ZERO, P, UINodeMask::ZERO, &mut res, &mut collision);
+        let parallel = false;
 
         //// parallel version (is not worth it for regular input)
-        // let deg_ordered = deg_order(& neighbors);
-        // assert_eq!(deg_ordered.len(), neighbors.iter().filter(|x|x.len()>0).count());
-        // bron_kerbosch_top(&neighbor_mask, &deg_ordered, P, &mut res, &mut collision);
-        // println!("collision {}", collision);
-
+        if parallel {
+            let deg_ordered = deg_order(&neighbors);
+            assert_eq!(
+                deg_ordered.len(),
+                neighbors.iter().filter(|x| x.len() > 0).count()
+            );
+            bron_kerbosch_top(&neighbor_mask, &deg_ordered, P, &mut res, &mut collision);
+            println!("collision {}", collision);
+        } else {
+            bron_kerbosch(
+                &neighbor_mask,
+                UINodeMask::ZERO,
+                P,
+                UINodeMask::ZERO,
+                &mut res,
+                &mut collision,
+            );
+        }
 
         let mut parts = vec![];
         while !res.is_zero() {
             let v = res.trailing_zeros() as usize;
             let (c1, c2) = (v / 26, v % 26);
-            parts.push(format!("{}{}", (c1 as u8 + b'a') as char, (c2 as u8 + b'a') as char));
+            parts.push(format!(
+                "{}{}",
+                (c1 as u8 + b'a') as char,
+                (c2 as u8 + b'a') as char
+            ));
             res ^= UINodeMask::power_of_two(v as u32);
         }
         parts.join(",")
     };
     let parts = vec![1, 2];
     // par iter is not worth it
-    let res = parts.iter().map(|&p| {
-        let res = if p == 1 {
-            solve_p1()
-            //"XXX".to_string()
-        } else {
-            solve_p2()
-        };
-        res
-    }).collect::<Vec<_>>();
+    let res = parts
+        .iter()
+        .map(|&p| {
+            let res = if p == 1 {
+                solve_p1()
+                //"XXX".to_string()
+            } else {
+                solve_p2()
+            };
+            println!("{}", res);
+            res
+        })
+        .collect::<Vec<_>>();
     (res[0].clone(), res[1].clone())
 }
