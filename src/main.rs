@@ -1,3 +1,4 @@
+#![feature(iter_array_chunks)]
 #![allow(dead_code)]
 mod aoc;
 mod str_map;

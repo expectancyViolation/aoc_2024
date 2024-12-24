@@ -1,9 +1,11 @@
 use crate::year24::day24_::Value::Undetermined;
-use hashbrown::HashMap;
+use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 use rand::prelude::StdRng;
 use rand::{Rng, SeedableRng};
 use std::ops::{BitAnd, BitOr, BitXor};
+//use rayon::prelude::IntoParallelRefIterator;
+//use rayon::iter::ParallelIterator;
 
 #[derive(Debug, Clone, PartialEq, Copy, Ord, PartialOrd, Eq)]
 enum Day24Operand {
@@ -90,6 +92,75 @@ impl BitXor for Value {
 const OUTPUT_BITS: usize = 46;
 
 const INPUT_BITS: usize = 45;
+
+fn get_by_distance(gates: &Vec<Day24Gate>, vert: usize) -> Vec<usize> {
+    let mut neighbors = HashMap::new();
+    for i in 0..gates.len() {
+        let e = neighbors.entry(i).or_insert_with(Vec::new);
+        let j1 = gates[i].arg1;
+        let j2 = gates[i].arg2;
+        e.push(j1);
+        e.push(j2);
+        let ej1 = neighbors.entry(j1).or_insert_with(Vec::new);
+        ej1.push(i);
+        let ej2 = neighbors.entry(j2).or_insert_with(Vec::new);
+        ej2.push(i);
+    }
+
+    let mut frontier = vec![vert];
+    let mut nbs = vec![vert];
+    let mut seen = HashSet::new();
+    for i in 0..2 * INPUT_BITS {
+        seen.insert(i);
+    }
+    while !frontier.is_empty() {
+        let mut nf = Vec::new();
+        for i in frontier.iter() {
+            nbs.push(*i);
+            for j in neighbors[i].iter() {
+                if !seen.contains(j) {
+                    seen.insert(*j);
+                    nf.push(*j);
+                }
+            }
+        }
+        frontier = nf;
+    }
+    nbs
+}
+
+fn get_upstream(gates: &Vec<Day24Gate>, vert: usize) -> Vec<usize> {
+    let mut res = vec![];
+    let mut seen = vec![false; gates.len()];
+    for i in 0..gates.len() {
+        if gates[i].arg1 == usize::MAX {
+            seen[i] = true;
+            //res.push(i);
+        }
+    }
+
+    let mut frontier = vec![vert];
+    seen[vert] = true;
+    while !frontier.is_empty() {
+        let mut nf = vec![];
+        for &curr in frontier.iter() {
+            res.push(curr);
+            let arg1 = gates[curr].arg1;
+            if !seen[arg1] {
+                nf.push(arg1);
+                seen[arg1] = true;
+            }
+            let arg2 = gates[curr].arg2;
+            if !seen[arg2] {
+                nf.push(arg2);
+                seen[arg2] = true;
+            }
+        }
+        frontier = nf;
+    }
+    res
+}
+
 fn get_output(gates: &Vec<Day24Gate>, values: &mut Vec<Value>) -> u64 {
     for i in 0..gates.len() {
         if values[i] != Undetermined {
@@ -137,7 +208,9 @@ const LIMIT_NUM: u64 = (1u64 << INPUT_BITS);
 fn validate(gates: &Vec<Day24Gate>, values: &mut Vec<Value>, n_digs: usize) -> bool {
     let mut rng = StdRng::from_os_rng();
     let mask = (1 << n_digs) - 1;
-    for _ in 0..100 {
+    // TODO: what is the failure rate? (up to now no failures occured!)
+    // can we be more systematic?
+    for _ in 0..50 {
         let x = rng.random_range(0..LIMIT_NUM);
         let y = rng.random_range(0..LIMIT_NUM);
         let z_real = x + y;
@@ -162,25 +235,55 @@ fn validate(gates: &Vec<Day24Gate>, values: &mut Vec<Value>, n_digs: usize) -> b
 }
 
 fn solve_iterative(gates: &mut Vec<Day24Gate>) -> Vec<usize> {
-    let mut buffer = vec![Value::Undetermined; gates.len()];
     let mut swaps = Vec::new();
+
+    let mut buffer = vec![Value::Undetermined; gates.len()];
     for i in 0..INPUT_BITS + 1 {
         let valid = validate(gates, &mut buffer, i);
         if valid {
             continue;
         }
-        for swap in (2 * INPUT_BITS..gates.len()).combinations(2) {
-            let s1 = swap[0];
-            let s2 = swap[1];
-            gates.swap(s1, s2);
-            let valid = validate(gates, &mut buffer, i);
-            if valid {
-                swaps.push(s1);
-                swaps.push(s2);
-                break;
+        // if we want to have an influence on i-th bit, we have to modify a connection in its "upstream"
+        let zi = gates.len() - OUTPUT_BITS + i;
+        let upstream = get_upstream(&gates, zi);
+        // heuristic: try local changes first
+        let mut by_distance = get_by_distance(&gates, zi);
+        let mut to_check = by_distance;
+        let all_connections = (2 * INPUT_BITS..gates.len());
+        for x in all_connections {
+            if !to_check.contains(&x) {
+                to_check.push(x);
             }
-            gates.swap(s1, s2);
         }
+        let cands = upstream
+            .iter()
+            .flat_map(|v| to_check.iter().map(|w| (*v, *w)))
+            .array_chunks::<10>()
+            .collect::<Vec<_>>();
+        let (s1, s2) = cands
+            .iter()
+            .find_map(|c| {
+                // parallel iter not worth it
+                //let (s1, s2) = cands.par_iter().find_map_first(|c| {
+                //let mut gates = gates.clone();
+                //let mut buffer = vec![Value::Undetermined; gates.len()];
+                for (s1, s2) in c {
+                    if s1 == s2 {
+                        continue;
+                    }
+                    gates.swap(*s1, *s2);
+                    let valid = validate(&gates, &mut buffer, i);
+                    gates.swap(*s1, *s2);
+                    if valid {
+                        return Some((*s1, *s2));
+                    }
+                }
+                None
+            })
+            .unwrap();
+        gates.swap(s1, s2);
+        swaps.push(s1);
+        swaps.push(s2);
     }
     swaps
 }
@@ -198,6 +301,8 @@ pub(crate) fn solve(data: &str) -> (String, String) {
         })
     };
 
+    // gates are sorted:
+    //  first x bits, then y bits, then other nodes, then z bits
     let mut gates = vec![Day24Gate::new(); 1000];
     let mut input_val = vec![Value::Undetermined; 1000];
     data[..split].lines().for_each(|l| {
