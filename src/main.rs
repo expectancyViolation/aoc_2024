@@ -20,7 +20,7 @@ use thiserror::Error;
 
 use crate::aoc::{AocClient, AocDailyPart, AocResponse, AocSolveResult, AocStatus, Solution};
 use crate::year16::{day12,  day25};
-use crate::year24::{day23, day23_bron, day23_weird_input,day24};
+use crate::year24::{day23, day23_bron, day23_weird_input, day24, day24_};
 use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -167,7 +167,7 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
 
         //println!("{}", res);
 
-        let res = run_solve(&client, &aoc_user, 24, day24::solve).await;
+        let res = run_solve(&client, &aoc_user, 24, day24_::solve).await;
 
         println!("{}", res);
     })

@@ -46,11 +46,6 @@ fn get_output(gates: &HashMap<String, Day24Gate>, inputs: &HashMap<String, bool>
     while !to_determine.is_empty() {
         let could_determine_gates = to_determine.iter().filter_map(|(output, gate)|
             {
-                let outname = output;
-                if determined.contains_key(outname) {
-                    println!("already determined {}", outname);
-                    panic!()
-                }
                 if determined.contains_key(&gate.arg1) && determined.contains_key(&gate.arg2) {
                     Some(gate)
                 } else {
@@ -82,21 +77,21 @@ fn get_output(gates: &HashMap<String, Day24Gate>, inputs: &HashMap<String, bool>
 }
 
 
-const limit: usize = 45;
+const LIMIT: usize = 45;
 
-const limit_num: u64 = (1u64 << limit);
+const LIMIT_NUM: u64 = (1u64 << LIMIT);
 
 fn get_ips(x: u64, y: u64) -> (HashMap<String, bool>) {
     let mut determined = HashMap::<String, bool>::new();
     let mut xx = x;
-    for i in 0..limit {
+    for i in 0..LIMIT {
         determined.insert(format!("x{:02}", i), xx % 2 == 1);
         xx /= 2;
     }
 
     let mut yy = y;
 
-    for i in 0..limit {
+    for i in 0..LIMIT {
         determined.insert(format!("y{:02}", i), yy % 2 == 1);
         yy /= 2;
     }
@@ -108,8 +103,8 @@ fn validate(gates: &HashMap<String, Day24Gate>, swaps: &HashMap<String, String>,
     let mut rng = StdRng::from_os_rng();
     let mask = (1 << n_digs) - 1;
     for _ in 0..100 {
-        let x = rng.random_range(0..limit_num);
-        let y = rng.random_range(0..limit_num);
+        let x = rng.random_range(0..LIMIT_NUM);
+        let y = rng.random_range(0..LIMIT_NUM);
         let z_real = x + y;
         let ips = get_ips(x, y);
         let z = get_output(gates, &ips, swaps);
@@ -125,7 +120,7 @@ fn validate(gates: &HashMap<String, Day24Gate>, swaps: &HashMap<String, String>,
 
 fn solve_iterative(gates: &HashMap<String, Day24Gate>) -> HashMap<String, String> {
     let mut swaps = HashMap::<String, String>::new();
-    for i in 0..limit + 1 {
+    for i in 0..LIMIT + 1 {
         let valid = validate(gates, &swaps, i);
         if valid {
             continue;
