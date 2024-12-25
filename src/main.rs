@@ -8,6 +8,10 @@ mod year24;
 
 mod year16;
 
+use crate::aoc::{AocClient, AocDailyPart, AocResponse, AocSolveResult, AocStatus, Solution};
+use crate::year16::day12;
+use crate::year24::day25;
+use crate::ExampleError::DiskError;
 use cached::proc_macro::io_cached;
 use galois_field_2pm::GaloisField;
 use reqwest::cookie::Jar;
@@ -15,14 +19,8 @@ use reqwest::{Client, Url};
 use std::fmt::{Debug, Display};
 use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use std::{io, str};
+use std::str;
 use thiserror::Error;
-use tokio::fs;
-use std::fs as fss;
-use crate::aoc::{AocClient, AocDailyPart, AocResponse, AocSolveResult, AocStatus, Solution};
-use crate::year16::{day12, };
-use crate::year24::{day23, day23_bron, day23_weird_input, day24, day24_,day25};
-use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::runtime::Runtime;
@@ -138,7 +136,6 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
         let client = AocClient::for_year(prepare_client(&aoc_session), year);
 
 
-        /*
         let mut results = vec![];
 
         for &(day, solver) in solves {
@@ -149,17 +146,20 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
         }
 
         let mut total_micros = 0;
-        for (res, status) in results {
+        for (res, status) in results.iter() {
             println!("{}", res);
             if status.is_some() {
-                let status = status.unwrap();
+                let status = status.clone().unwrap();
                 status.validate_result(&res);
             }
             println!("\n---");
             total_micros += res.elapsed_micros;
         }
 
-        println!("Total solve time: {} μs", total_micros);*/
+        for (res, status) in results.iter() {
+            println!("day {} {} μs", res.day, res.elapsed_micros);
+        }
+        println!("Total solve time: {} μs", total_micros);
 
         //let res = run_solve(&client, &aoc_user, 23, day23_weird_input::solve).await;
 
@@ -168,9 +168,9 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
 
         //println!("{}", res);
 
-        let res = run_solve(&client, &aoc_user, 25, day25::solve).await;
+        //let res = run_solve(&client, &aoc_user, 25, day25::solve).await;
 
-        println!("{}", res);
+        //println!("{}", res);
     })
 }
 

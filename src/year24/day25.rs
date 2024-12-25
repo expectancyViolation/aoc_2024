@@ -1,15 +1,14 @@
-use itertools::Itertools;
+use itertools::{iproduct, Itertools};
 
 pub(crate) fn solve(data: &str) -> (String, String) {
-    let keys = data.split("\n\n").map(|block| {
-        let mut counts = [0; 7];
+
+    let mut keys = Vec::new();
+    let mut locks = Vec::new();
+    data.split("\n\n").for_each(|block| {
+        let mut counts = [0; 5];
         let first_line = block.lines().next().unwrap();
-        let fc = first_line.chars().next().unwrap();
-        if fc == '#' {
-            counts[5] = 7;
-        } else {
-            counts[6] = 7;
-        };
+        let is_key = first_line.chars().next().unwrap() == '#';
+
         for line in block.lines() {
             for (i, x) in line.chars().enumerate() {
                 if x == '#' {
@@ -17,11 +16,15 @@ pub(crate) fn solve(data: &str) -> (String, String) {
                 }
             }
         }
-        counts
-    }).collect::<Vec<_>>();
+        if is_key {
+            keys.push(counts);
+        } else {
+            locks.push(counts);
+        }
+    });
     let mut res = 0;
-    for v in keys.iter().combinations(2) {
-        let matches = v[0].iter().zip(v[1]).all(|(a, b)| (a + b) <= 7);
+    for v in iproduct!(keys, locks) {
+        let matches = v.0.iter().zip(v.1).all(|(a, b)| (a + b) <= 7);
         if matches {
             res += 1;
         }

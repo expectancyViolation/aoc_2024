@@ -212,7 +212,6 @@ pub(crate) fn solve(data: &str) -> (String, String) {
             } else {
                 solve_p2()
             };
-            println!("{}", res);
             res
         })
         .collect::<Vec<_>>();
