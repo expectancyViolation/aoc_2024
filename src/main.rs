@@ -1,4 +1,3 @@
-#![feature(iter_array_chunks)]
 #![allow(dead_code)]
 mod aoc;
 mod str_map;
@@ -18,10 +17,11 @@ use std::sync::Arc;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use std::{io, str};
 use thiserror::Error;
-
+use tokio::fs;
+use std::fs as fss;
 use crate::aoc::{AocClient, AocDailyPart, AocResponse, AocSolveResult, AocStatus, Solution};
-use crate::year16::{day12,  day25};
-use crate::year24::{day23, day23_bron, day23_weird_input, day24, day24_};
+use crate::year16::{day12, };
+use crate::year24::{day23, day23_bron, day23_weird_input, day24, day24_,day25};
 use crate::ExampleError::DiskError;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -168,7 +168,7 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
 
         //println!("{}", res);
 
-        let res = run_solve(&client, &aoc_user, 24, day24_::solve).await;
+        let res = run_solve(&client, &aoc_user, 25, day25::solve).await;
 
         println!("{}", res);
     })
@@ -193,9 +193,9 @@ fn main() {
     benchmark_year(2024, &solves);
 
     //main_2016();
-    //let stdin = io::read_to_string(io::stdin()).unwrap();
-    //let res = day23::solve(stdin.as_str());
-    //println!("day23 result:{:?}", res);
+    // let stdin = io::read_to_string(io::stdin()).unwrap();
+    //let res = day24_::solve(data.as_str());
+    //println!("day24 result:{:?}", res);
     //let res = day23_bron::solve(stdin.as_str());
     //println!("day23 result:{:?}", res);
 }

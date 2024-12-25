@@ -43,6 +43,7 @@ pub(crate) mod day23_weird_input;
 pub(crate) mod day24;
 pub(crate) mod day24_;
 mod day24_topo;
+pub(crate) mod day25;
 
 lazy_static! {
  pub(crate) static ref SOLVES: Vec<(i64,Solution )> = vec![

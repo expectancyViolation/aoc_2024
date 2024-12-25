@@ -89,9 +89,10 @@ impl BitXor for Value {
     }
 }
 
-const OUTPUT_BITS: usize = 46;
 
-const INPUT_BITS: usize = 45;
+const INPUT_BITS: usize = 16;
+const OUTPUT_BITS: usize = INPUT_BITS + 1;
+
 
 fn get_by_distance(gates: &Vec<Day24Gate>, vert: usize) -> Vec<usize> {
     let mut neighbors = HashMap::new();
@@ -169,6 +170,8 @@ fn get_output(gates: &Vec<Day24Gate>, values: &mut Vec<Value>) -> u64 {
         let mut stack = vec![i];
         while !stack.is_empty() {
             if stack.len() > values.len() {
+                // println!("cycle {}",values.len());
+                //panic!("cycle");
                 return u64::MAX;
             }
             let last = stack.last().unwrap();
@@ -178,18 +181,24 @@ fn get_output(gates: &Vec<Day24Gate>, values: &mut Vec<Value>) -> u64 {
             }
             let arg1 = gates[*last].arg1;
             if values[arg1] == Undetermined {
+                // println!("pushing {}",arg1);
                 stack.push(arg1);
                 continue;
             }
             let arg2 = gates[*last].arg2;
             if values[arg2] == Undetermined {
                 stack.push(arg2);
+                // println!("pushing {}",arg2);
                 continue;
             }
+            assert_eq!(values[*last], Undetermined);
             values[*last] = gates[*last].apply(values[arg1], values[arg2]);
+            //println!("determining {} {:?} {:?}",last,gates[*last],values[*last]);
         }
     }
     let mut res = 0;
+    //println!("{} {}",values.len(),values.len()-OUTPUT_BITS);
+    //println!("{:?}",values[values.len()-OUTPUT_BITS-1]);
     values[values.len() - OUTPUT_BITS..]
         .iter()
         .rev()
@@ -210,7 +219,7 @@ fn validate(gates: &Vec<Day24Gate>, values: &mut Vec<Value>, n_digs: usize) -> b
     let mask = (1 << n_digs) - 1;
     // TODO: what is the failure rate? (up to now no failures occured!)
     // can we be more systematic?
-    for _ in 0..50 {
+    for _ in 0..10000 {
         let x = rng.random_range(0..LIMIT_NUM);
         let y = rng.random_range(0..LIMIT_NUM);
         let z_real = x + y;
@@ -228,6 +237,7 @@ fn validate(gates: &Vec<Day24Gate>, values: &mut Vec<Value>, n_digs: usize) -> b
         }
         let z = get_output(gates, values);
         if z & mask != z_real & mask {
+            //println!("validate failed {} {} {} {})", z & mask, z_real & mask, x & mask, y & mask);
             return false;
         }
     }
@@ -238,11 +248,12 @@ fn solve_iterative(gates: &mut Vec<Day24Gate>) -> Vec<usize> {
     let mut swaps = Vec::new();
 
     let mut buffer = vec![Value::Undetermined; gates.len()];
-    for i in 0..INPUT_BITS + 1 {
+    for i in 5..INPUT_BITS + 1 {
         let valid = validate(gates, &mut buffer, i);
         if valid {
             continue;
         }
+        println!("invalid{}", i);
         // if we want to have an influence on i-th bit, we have to modify a connection in its "upstream"
         let zi = gates.len() - OUTPUT_BITS + i;
         let upstream = get_upstream(&gates, zi);
@@ -258,32 +269,24 @@ fn solve_iterative(gates: &mut Vec<Day24Gate>) -> Vec<usize> {
         let cands = upstream
             .iter()
             .flat_map(|v| to_check.iter().map(|w| (*v, *w)))
-            .array_chunks::<10>()
             .collect::<Vec<_>>();
-        let (s1, s2) = cands
-            .iter()
-            .find_map(|c| {
-                // parallel iter not worth it
-                //let (s1, s2) = cands.par_iter().find_map_first(|c| {
-                //let mut gates = gates.clone();
-                //let mut buffer = vec![Value::Undetermined; gates.len()];
-                for (s1, s2) in c {
-                    if s1 == s2 {
-                        continue;
-                    }
-                    gates.swap(*s1, *s2);
-                    let valid = validate(&gates, &mut buffer, i);
-                    gates.swap(*s1, *s2);
-                    if valid {
-                        return Some((*s1, *s2));
-                    }
-                }
-                None
-            })
-            .unwrap();
-        gates.swap(s1, s2);
-        swaps.push(s1);
-        swaps.push(s2);
+        for (s1, s2) in cands {
+            // parallel iter not worth it
+            //let (s1, s2) = cands.par_iter().find_map_first(|c| {
+            //let mut gates = gates.clone();
+            //let mut buffer = vec![Value::Undetermined; gates.len()];
+            if s1 == s2 {
+                continue;
+            }
+            gates.swap(s1, s2);
+            let valid = validate(&gates, &mut buffer, i);
+            if valid {
+                swaps.push(s1);
+                swaps.push(s2);
+                break;
+            }
+            gates.swap(s1, s2);
+        }
     }
     swaps
 }
@@ -306,34 +309,45 @@ pub(crate) fn solve(data: &str) -> (String, String) {
     let mut gates = vec![Day24Gate::new(); 1000];
     let mut input_val = vec![Value::Undetermined; 1000];
     data[..split].lines().for_each(|l| {
+        println!("{:?}", l);
         let node = l[..3].to_string();
         let val = l[5..].parse::<i32>().unwrap();
         let i = get_or_create_vert(&node);
         input_val[i] = if val == 1 { Value::On } else { Value::Off };
     });
-    data[split + 2..]
+    let split_els = data[split + 2..]
         .lines()
         .map(|l| {
             let elements = l.trim().split(" ").collect::<Vec<&str>>();
             elements
         })
-        .sorted_by_key(|els| els[4])
-        .for_each(|el| {
-            let i = get_or_create_vert(&el[0]);
-            let j = get_or_create_vert(&el[2]);
-            let k = get_or_create_vert(&el[4]);
-            let op = match el[1] {
-                "OR" => Day24Operand::OR,
-                "AND" => Day24Operand::AND,
-                "XOR" => Day24Operand::XOR,
-                &_ => unreachable!(),
-            };
-            gates[k].arg1 = i;
-            gates[k].arg2 = j;
-            gates[k].operand = op;
-        });
+        .sorted_by_key(|els| {
+            els[4].to_string()
+        }).collect::<Vec<_>>();
+    split_els.iter().for_each(
+        |el| {
+            let _ = get_or_create_vert(&el[4]);
+        }
+    );
+    split_els.iter().for_each(|el| {
+        let i = get_or_create_vert(&el[0]);
+        let j = get_or_create_vert(&el[2]);
+        let k = get_or_create_vert(&el[4]);
+        let op = match el[1] {
+            "OR" => Day24Operand::OR,
+            "AND" => Day24Operand::AND,
+            "XOR" => Day24Operand::XOR,
+            &_ => unreachable!(),
+        };
+        gates[k].arg1 = i;
+        gates[k].arg2 = j;
+        gates[k].operand = op;
+    });
     gates.truncate(verts.len());
     input_val.truncate(verts.len());
+    // for (i, g) in gates.iter().enumerate() {
+    //     println!("{i} {:?} {:?} {:?}", g, verts[i], input_val[i]);
+    // }
 
     let mut p1_vals = input_val.clone();
     let p1 = get_output(&gates, &mut p1_vals);
