@@ -1,10 +1,5 @@
-use std::collections::BTreeSet;
 use crate::str_map::{StrMap, DIRECTIONS};
-use crate::util::FenwickTree;
 use itertools::Itertools;
-use rayon::iter::IndexedParallelIterator;
-use rayon::iter::IntoParallelRefIterator;
-use rayon::iter::ParallelIterator;
 
 const PADDING: i32 = 30;
 

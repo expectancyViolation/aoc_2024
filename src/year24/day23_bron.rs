@@ -1,7 +1,6 @@
 use hashbrown::HashMap;
 use itertools::Itertools;
 use tokio::time::Instant;
-use union_find::UnionFind;
 
 pub(crate) fn solve(data: &str) -> (String, String) {
     let mut connections: Vec<Vec<u16>> = vec![Vec::new(); 1000];
@@ -19,7 +18,7 @@ pub(crate) fn solve(data: &str) -> (String, String) {
     }
 
     // not even worth it, since they all have degree 13?
-    counts.iter().sorted_by_key(|&(x, &c)| -c).for_each(|(&x, _)| {
+    counts.iter().sorted_by_key(|&(_, &c)| -c).for_each(|(&x, _)| {
         let _ = node_index.entry(x).or_insert_with(|| {
             node_lookup.push(x);
             (node_lookup.len() - 1) as u16
@@ -68,7 +67,6 @@ pub(crate) fn solve(data: &str) -> (String, String) {
     }
     println!("{}", res);
 
-    let started = Instant::now();
 
     // let mut candidates = (0..node_lookup.len()).map(|x|vec![x]).collect_vec();
     let tl=triples.len();

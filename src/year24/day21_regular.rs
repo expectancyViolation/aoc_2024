@@ -73,7 +73,7 @@ fn gen_poss_letter_seqs(letter: char, keymap: &Keymap, start: (i32, i32)) -> Cha
         }
     }
     let l = curr_moves.len();
-    let res = Box::new(curr_moves.into_iter().permutations(l).filter_map(move |mut m| {
+    let res = Box::new(curr_moves.into_iter().permutations(l).filter_map(move | m| {
         let (mut x, mut y) = start;
         let mut res = "".to_string();
         for d in m.iter() {
@@ -108,9 +108,8 @@ pub fn solve_keycode(code: &str, depth: i32, initial: bool) -> i128 {
         return code.len() as i128;
     }
     let mut res = 0;
-    let mut curr_pos = (0, 0);
     let kp: &Keymap = if initial { &num_keypad } else { &dir_keypad };
-    curr_pos = find_keymap(kp, 'A');
+    let mut curr_pos = find_keymap(kp, 'A');
     for c in code.chars() {
         let mut c_cost: i128 = i128::MAX;
         for seq in gen_poss_letter_seqs(c, kp, curr_pos) {

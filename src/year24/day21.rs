@@ -1,4 +1,3 @@
-use bnum::BUint;
 use itertools::Itertools;
 
 const NUM_CHARS: usize = 11;
@@ -151,7 +150,7 @@ pub fn solve(data: &str) -> (String, String) {
     let mut counts = vec![0; NUM_CHARS * NUM_CHARS];
 
     for inp in data.lines() {
-        let mut inp = inp.trim();
+        let inp = inp.trim();
         let num_val = inp[..inp.len() - 1].parse::<u64>().unwrap();
         //let num_val=ULINT::parse_str_radix(&inp[..inp.len()-1],10);
 

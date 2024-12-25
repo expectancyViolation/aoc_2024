@@ -170,8 +170,6 @@ fn get_output(gates: &Vec<Day24Gate>, values: &mut Vec<Value>) -> u64 {
         let mut stack = vec![i];
         while !stack.is_empty() {
             if stack.len() > values.len() {
-                // println!("cycle {}",values.len());
-                //panic!("cycle");
                 return u64::MAX;
             }
             let last = stack.last().unwrap();
@@ -181,24 +179,18 @@ fn get_output(gates: &Vec<Day24Gate>, values: &mut Vec<Value>) -> u64 {
             }
             let arg1 = gates[*last].arg1;
             if values[arg1] == Undetermined {
-                // println!("pushing {}",arg1);
                 stack.push(arg1);
                 continue;
             }
             let arg2 = gates[*last].arg2;
             if values[arg2] == Undetermined {
                 stack.push(arg2);
-                // println!("pushing {}",arg2);
                 continue;
             }
-            assert_eq!(values[*last], Undetermined);
             values[*last] = gates[*last].apply(values[arg1], values[arg2]);
-            //println!("determining {} {:?} {:?}",last,gates[*last],values[*last]);
         }
     }
     let mut res = 0;
-    //println!("{} {}",values.len(),values.len()-OUTPUT_BITS);
-    //println!("{:?}",values[values.len()-OUTPUT_BITS-1]);
     values[values.len() - OUTPUT_BITS..]
         .iter()
         .rev()
@@ -213,7 +205,7 @@ fn get_output(gates: &Vec<Day24Gate>, values: &mut Vec<Value>) -> u64 {
     res
 }
 
-const LIMIT_NUM: u64 = (1u64 << INPUT_BITS);
+const LIMIT_NUM: u64 = 1u64 << INPUT_BITS;
 fn validate(gates: &Vec<Day24Gate>, values: &mut Vec<Value>, n_digs: usize) -> bool {
     let mut rng = StdRng::from_os_rng();
     let mask = (1 << n_digs) - 1;
@@ -248,7 +240,7 @@ fn solve_iterative(gates: &mut Vec<Day24Gate>) -> Vec<usize> {
     let mut swaps = Vec::new();
 
     let mut buffer = vec![Value::Undetermined; gates.len()];
-    for i in 5..INPUT_BITS + 1 {
+    for i in 0..INPUT_BITS + 1 {
         let valid = validate(gates, &mut buffer, i);
         if valid {
             continue;
@@ -257,9 +249,9 @@ fn solve_iterative(gates: &mut Vec<Day24Gate>) -> Vec<usize> {
         let zi = gates.len() - OUTPUT_BITS + i;
         let upstream = get_upstream(&gates, zi);
         // heuristic: try local changes first
-        let mut by_distance = get_by_distance(&gates, zi);
+        let by_distance = get_by_distance(&gates, zi);
         let mut to_check = by_distance;
-        let all_connections = (2 * INPUT_BITS..gates.len());
+        let all_connections = 2 * INPUT_BITS..gates.len();
         for x in all_connections {
             if !to_check.contains(&x) {
                 to_check.push(x);
@@ -270,10 +262,6 @@ fn solve_iterative(gates: &mut Vec<Day24Gate>) -> Vec<usize> {
             .flat_map(|v| to_check.iter().map(|w| (*v, *w)))
             .collect::<Vec<_>>();
         for (s1, s2) in cands {
-            // parallel iter not worth it
-            //let (s1, s2) = cands.par_iter().find_map_first(|c| {
-            //let mut gates = gates.clone();
-            //let mut buffer = vec![Value::Undetermined; gates.len()];
             if s1 == s2 {
                 continue;
             }
@@ -324,6 +312,7 @@ pub(crate) fn solve(data: &str) -> (String, String) {
         }).collect::<Vec<_>>();
     split_els.iter().for_each(
         |el| {
+            // else order might break; TODO very messy
             let _ = get_or_create_vert(&el[4]);
         }
     );
@@ -343,9 +332,6 @@ pub(crate) fn solve(data: &str) -> (String, String) {
     });
     gates.truncate(verts.len());
     input_val.truncate(verts.len());
-    // for (i, g) in gates.iter().enumerate() {
-    //     println!("{i} {:?} {:?} {:?}", g, verts[i], input_val[i]);
-    // }
 
     let mut p1_vals = input_val.clone();
     let p1 = get_output(&gates, &mut p1_vals);

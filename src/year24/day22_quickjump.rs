@@ -183,7 +183,7 @@ pub(crate) fn solve(data: &str) -> (String, String) {
             let bit = (i & num).count_ones() % 2;
             k = 2 * k + bit;
         });
-        p1 += (k as u128);
+        p1 += k as u128;
         // println!("{} {}", num, k);
         // let started = Instant::now();
         // let predicted = predict_cycle(num);

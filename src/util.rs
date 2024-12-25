@@ -78,9 +78,9 @@ impl FenwickTree {
 
 #[cfg(test)]
 mod tests {
+    use crate::util::FenwickTree;
     use rand::rngs::StdRng;
     use rand::{Rng, SeedableRng};
-    use crate::util::FenwickTree;
 
     #[test]
     fn fenwick_works() {

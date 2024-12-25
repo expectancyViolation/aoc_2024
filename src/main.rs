@@ -13,7 +13,6 @@ use crate::year16::day12;
 use crate::year24::day25;
 use crate::ExampleError::DiskError;
 use cached::proc_macro::io_cached;
-use galois_field_2pm::GaloisField;
 use reqwest::cookie::Jar;
 use reqwest::{Client, Url};
 use std::fmt::{Debug, Display};
@@ -156,21 +155,10 @@ fn benchmark_year(year: i32, solves: &Vec<(i64, Solution)>) {
             total_micros += res.elapsed_micros;
         }
 
-        for (res, status) in results.iter() {
+        for (res, _status) in results.iter() {
             println!("day {} {} μs", res.day, res.elapsed_micros);
         }
         println!("Total solve time: {} μs", total_micros);
-
-        //let res = run_solve(&client, &aoc_user, 23, day23_weird_input::solve).await;
-
-
-        //let res = run_solve(&client, &aoc_user, 23, day23::solve).await;
-
-        //println!("{}", res);
-
-        //let res = run_solve(&client, &aoc_user, 25, day25::solve).await;
-
-        //println!("{}", res);
     })
 }
 

@@ -30,9 +30,9 @@ fn bron_kerbosch(
             *collision = false;
         }
     };
-    let mut cands = (p | x);
+    let cands = p | x;
     // bitset makes pivot selection difficult. just pick the lowest one
-    let mut cand = cands.trailing_zeros();
+    let cand = cands.trailing_zeros();
     let mut q = p;
     if cand < UINodeMask::BITS {
         let nu = neighbors[cand as usize];
@@ -56,8 +56,8 @@ fn bron_kerbosch_top(
     res: &mut UINodeMask,
     collision: &mut bool,
 ) {
-    let mut ps = Arc::new(Mutex::new(p));
-    let mut xs = Arc::new(Mutex::new(UINodeMask::ZERO));
+    let ps = Arc::new(Mutex::new(p));
+    let xs = Arc::new(Mutex::new(UINodeMask::ZERO));
     let mut verts = (0..NUM_LETTERS * NUM_LETTERS).collect_vec();
     let mut rng = StdRng::from_os_rng();
     verts.shuffle(&mut rng);
@@ -120,17 +120,17 @@ fn deg_order(neighbors: &Vec<Vec<usize>>) -> Vec<usize> {
 pub(crate) fn solve(data: &str) -> (String, String) {
     let mut neighbor_mask: Vec<UINodeMask> = vec![UINodeMask::ZERO; 1000];
     let mut neighbors: Vec<Vec<usize>> = vec![Vec::new(); 1000];
-    let mut P = UINodeMask::ZERO;
+    let mut vertices = UINodeMask::ZERO;
 
     for line in data.lines() {
         let b = line.bytes().collect_vec();
         let n1 = ((b[0] - b'a') as usize) * 26 + (b[1] - b'a') as usize;
         let n1_mask = UINodeMask::power_of_two(n1 as u32);
-        P |= n1_mask;
+        vertices |= n1_mask;
 
         let n2 = ((b[3] - b'a') as usize) * 26 + (b[4] - b'a') as usize;
         let n2_mask = UINodeMask::power_of_two(n2 as u32);
-        P |= n2_mask;
+        vertices |= n2_mask;
 
         neighbor_mask[n1] |= n2_mask;
         neighbor_mask[n2] |= n1_mask;
@@ -175,13 +175,13 @@ pub(crate) fn solve(data: &str) -> (String, String) {
                 deg_ordered.len(),
                 neighbors.iter().filter(|x| x.len() > 0).count()
             );
-            bron_kerbosch_top(&neighbor_mask, &deg_ordered, P, &mut res, &mut collision);
+            bron_kerbosch_top(&neighbor_mask, &deg_ordered, vertices, &mut res, &mut collision);
             println!("collision {}", collision);
         } else {
             bron_kerbosch(
                 &neighbor_mask,
                 UINodeMask::ZERO,
-                P,
+                vertices,
                 UINodeMask::ZERO,
                 &mut res,
                 &mut collision,

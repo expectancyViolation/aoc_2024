@@ -1,7 +1,6 @@
 use itertools::Itertools;
 use rand::prelude::{SliceRandom, StdRng};
 use rand::SeedableRng;
-use union_find::UnionFind;
 
 // input graph vertices all have degree 13
 // solution clique has size 13
